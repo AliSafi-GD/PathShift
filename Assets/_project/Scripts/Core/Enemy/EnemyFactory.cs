@@ -14,15 +14,14 @@ namespace _project.Scripts.Core.Enemy
         {
             this.startSpawnTransform = startSpawnTransform;
         }
-        public Domain.Entitties.Enemy CreateEnemy()
+        public Domain.Entitties.Enemy CreateEnemy(Vector3 spawnPosition)
         {
-            EnemyView instance = Instantiate(prefab);
+            EnemyView instance = Instantiate(prefab, spawnPosition, Quaternion.identity);
             var unityMovement = instance.GetOrAddComponent<UnityMovement>();
             var unityHealth = instance.GetOrAddComponent<UnityHealth>();
             var unityAttacker = instance.GetOrAddComponent<UnityAttacker>();
             var unityAttackable = instance.GetOrAddComponent<UnityAttackable>();
-            var enemy = new Domain.Entitties.Enemy(unityMovement, unityHealth, unityAttackable,unityAttacker,instance);
-            return enemy;
+            return new Domain.Entitties.Enemy(unityMovement, unityHealth, unityAttackable, unityAttacker, instance);
         }
     }
 }

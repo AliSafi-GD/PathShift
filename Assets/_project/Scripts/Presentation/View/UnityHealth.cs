@@ -7,7 +7,7 @@ namespace _project.Scripts.Presentation.View
     {
         public bool IsAlive { get; private set;}
         public float MaxHealth { get; private set;}
-        public float CurrentHealth { get; private set;}
+        public float CurrentHealth { get; set;}
         public void Heal(float amount)
         {
             CurrentHealth +=  amount;

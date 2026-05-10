@@ -23,7 +23,7 @@ namespace _project.Scripts.Core.Spawner
 
         public void SpawnOne()
         {
-            var enemy = _factory.CreateEnemy();
+            var enemy = _factory.CreateEnemy(_pathService.GetCurrentPath()[0].WorldPosition);
             var path = _pathService.GetCurrentPath();
 
             enemy.GetBehavior<UnityMovement>().SetPath(path);

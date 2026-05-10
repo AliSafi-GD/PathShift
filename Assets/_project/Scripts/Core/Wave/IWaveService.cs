@@ -12,7 +12,7 @@ namespace _project.Scripts.Core.Wave
         event Action<int> OnWaveEnded;
         event Action OnAllWavesCompleted;
 
-        void Start();
+        Task Start();
         void Stop();
     }
     public class WaveService : IWaveService
@@ -33,7 +33,7 @@ namespace _project.Scripts.Core.Wave
             _spawner = spawner;
         }
 
-        public async void Start()
+        public async Task Start()
         {
             _cts = new CancellationTokenSource();
             _currentWave = 0;
@@ -59,6 +59,10 @@ namespace _project.Scripts.Core.Wave
         public void Stop()
         {
             _cts?.Cancel();
+        }
+        ~WaveService()
+        {
+            Stop();
         }
     }
 }

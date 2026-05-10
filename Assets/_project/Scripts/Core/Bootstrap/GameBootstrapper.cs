@@ -72,7 +72,7 @@ namespace _project.Scripts.Core.Bootstrap
 
             //eventBus.Raise(new UpdatePath(path));
 
-            waveService.Start();
+            _ = waveService.Start();
         }
         private TestInput testInput;
 
@@ -186,6 +186,11 @@ namespace _project.Scripts.Core.Bootstrap
             // unityMovement.SetPath(_currentPath);
             // unityMovement.Move();
             // enemy.Move(pathCellView);
+        }
+
+        private void OnDestroy()
+        {
+            waveService.Stop();
         }
     }
 }
