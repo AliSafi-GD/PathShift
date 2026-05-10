@@ -31,17 +31,21 @@ namespace _project.Scripts.Editor.MapEditor
         [Header("Grid Data")]
         public GridData gridData;
 
+        // Editor-time state (هنوز هم لازم برای انتخاب کاربر قبل از Bake)
         public List<Vector3> NodeCenters { get; private set; } = new();
-        public List<Vector2Int> StartPointCells { get; private set; } = new();
-        public List<Vector2Int> EndPointCells { get; private set; } = new();
+        public List<Vector3> StartPoints { get; private set; } = new();
+        public List<Vector3> EndPoints { get; private set; } = new();
 
-        // حالت انتخاب
         public enum SelectionMode { None, SelectingStart, SelectingEnd }
         [HideInInspector] public SelectionMode currentSelectionMode = SelectionMode.None;
 
         private LineRenderer lr;
         private Vector3[] borderPoints;
         private List<Vector3[]> allHolePoints = new();
+
+        // ───────────────────────────────────────────────────────────
+        // Drawing
+        // ───────────────────────────────────────────────────────────
 
         void OnDrawGizmos()
         {
@@ -62,10 +66,12 @@ namespace _project.Scripts.Editor.MapEditor
             DrawGrid();
 
             if (showStartEndPoints)
-            {
                 DrawStartEndPoints();
-            }
         }
+
+        // ───────────────────────────────────────────────────────────
+        // Bake
+        // ───────────────────────────────────────────────────────────
 
         public void BakeGridData()
         {
@@ -79,89 +85,55 @@ namespace _project.Scripts.Editor.MapEditor
             }
 
             if (holeLineRenderers != null && holeLineRenderers.Length > 0)
-            {
                 FetchAllHolePoints();
-            }
 
-            // محاسبه محدوده گرید
-            float minX = float.MaxValue, maxX = float.MinValue;
-            float minZ = float.MaxValue, maxZ = float.MinValue;
-
-            foreach (var p in borderPoints)
-            {
-                if (p.x < minX) minX = p.x;
-                if (p.x > maxX) maxX = p.x;
-                if (p.z < minZ) minZ = p.z;
-                if (p.z > maxZ) maxZ = p.z;
-            }
-
-            // اگر gridData قدیمی است، حذف کن
-            if (gridData != null && !AssetDatabase.IsMainAsset(gridData))
-            {
-                gridData = null;
-            }
-
-            // GridData جدید یا موجود
             if (gridData == null)
             {
-                gridData = ScriptableObject.CreateInstance<GridData>();
-                gridData.name = $"{gameObject.name}_GridData";
-                
-                // ذخیره در Assets
-                string folderPath = "Assets/GridData";
-                if (!System.IO.Directory.Exists(folderPath))
-                {
-                    System.IO.Directory.CreateDirectory(folderPath);
-                }
-                
-                string assetPath = System.IO.Path.Combine(folderPath, $"{gridData.name}.asset");
-                assetPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
-                AssetDatabase.CreateAsset(gridData, assetPath);
+                Debug.LogError("GridData asset is not assigned!");
+                return;
             }
 
-            // پاک کردن داده‌های قدیمی
-            gridData.walkableNodes.Clear();
-            gridData.walkableCells.Clear();
+            // محدوده گرید
+            CalculateBounds(out float minX, out float maxX, out float minZ, out float maxZ);
 
             gridData.cellSize = cellSize;
             gridData.origin = transform.TransformPoint(new Vector3(minX, 0, minZ));
             gridData.width = Mathf.CeilToInt((maxX - minX) / cellSize);
             gridData.height = Mathf.CeilToInt((maxZ - minZ) / cellSize);
 
-            // پر کردن سلول‌های قابل عبور
-            float startX = minX;
-            float startZ = minZ;
+            gridData.walkableNodes.Clear();
 
-            for (float x = startX; x <= maxX; x += cellSize)
+            // پر کردن سلول‌های قابل عبور (فقط world position)
+            for (float x = minX; x <= maxX; x += cellSize)
             {
-                for (float z = startZ; z <= maxZ; z += cellSize)
+                for (float z = minZ; z <= maxZ; z += cellSize)
                 {
                     Vector3 center = new Vector3(x + cellSize * 0.5f, 0, z + cellSize * 0.5f);
-
                     if (!IsInsidePolygon(center)) continue;
                     if (IsInsideAnyHole(center)) continue;
 
                     Vector3 worldCenter = transform.TransformPoint(center);
                     gridData.walkableNodes.Add(worldCenter);
-
-                    Vector2Int gridPos = gridData.WorldToGrid(worldCenter);
-                    gridData.walkableCells.Add(gridPos);
                 }
             }
 
-            // ذخیره نقاط شروع و پایان
-            gridData.startPointCells = new List<Vector2Int>(StartPointCells);
-            gridData.endPointCells = new List<Vector2Int>(EndPointCells);
+            // ذخیره start/end points (به‌صورت world position)
+            gridData.startPoints = new List<Vector3>(StartPoints);
+            gridData.endPoints = new List<Vector3>(EndPoints);
 
-            // ذخیره asset
+#if UNITY_EDITOR
             EditorUtility.SetDirty(gridData);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+#endif
 
-            Debug.Log($"Grid baked: {gridData.walkableNodes.Count} walkable cells");
-            Debug.Log($"Start cells: {gridData.startPointCells.Count}, End cells: {gridData.endPointCells.Count}");
-            Debug.Log($"GridData saved to: {AssetDatabase.GetAssetPath(gridData)}");
+            Debug.Log($"Grid baked: {gridData.walkableNodes.Count} walkable nodes, " +
+                      $"{gridData.startPoints.Count} start points, {gridData.endPoints.Count} end points");
         }
+
+        // ───────────────────────────────────────────────────────────
+        // Helpers - Drawing
+        // ───────────────────────────────────────────────────────────
 
         void FetchPoints()
         {
@@ -247,29 +219,16 @@ namespace _project.Scripts.Editor.MapEditor
 
         void DrawGrid()
         {
-            float minX = float.MaxValue, maxX = float.MinValue;
-            float minZ = float.MaxValue, maxZ = float.MinValue;
-
-            foreach (var p in borderPoints)
-            {
-                if (p.x < minX) minX = p.x;
-                if (p.x > maxX) maxX = p.x;
-                if (p.z < minZ) minZ = p.z;
-                if (p.z > maxZ) maxZ = p.z;
-            }
+            CalculateBounds(out float minX, out float maxX, out float minZ, out float maxZ);
 
             Gizmos.color = gridColor;
             NodeCenters.Clear();
 
-            float startX = minX;
-            float startZ = minZ;
-
-            for (float x = startX; x <= maxX; x += cellSize)
+            for (float x = minX; x <= maxX; x += cellSize)
             {
-                for (float z = startZ; z <= maxZ; z += cellSize)
+                for (float z = minZ; z <= maxZ; z += cellSize)
                 {
                     Vector3 center = new Vector3(x + cellSize * 0.5f, 0, z + cellSize * 0.5f);
-
                     if (!IsInsidePolygon(center)) continue;
                     if (IsInsideAnyHole(center)) continue;
 
@@ -285,7 +244,7 @@ namespace _project.Scripts.Editor.MapEditor
 
                     Vector3 worldCenter = transform.TransformPoint(center);
                     NodeCenters.Add(worldCenter);
-                    
+
                     Gizmos.color = nodeColor;
                     Gizmos.DrawSphere(worldCenter, nodeRadius);
                     Gizmos.color = gridColor;
@@ -295,57 +254,67 @@ namespace _project.Scripts.Editor.MapEditor
 
         void DrawStartEndPoints()
         {
-            // رسم سلول‌های شروع (سبز)
             Gizmos.color = startPointColor;
-            foreach (var cellPos in StartPointCells)
-            {
-                Vector3 worldPos = gridData.GridToWorld(cellPos);
+            foreach (var worldPos in StartPoints)
                 Gizmos.DrawSphere(worldPos, pointRadius);
-            }
 
-            // رسم سلول‌های پایان (قرمز)
             Gizmos.color = endPointColor;
-            foreach (var cellPos in EndPointCells)
-            {
-                Vector3 worldPos = gridData.GridToWorld(cellPos);
+            foreach (var worldPos in EndPoints)
                 Gizmos.DrawSphere(worldPos, pointRadius);
+        }
+
+        void CalculateBounds(out float minX, out float maxX, out float minZ, out float maxZ)
+        {
+            minX = float.MaxValue; maxX = float.MinValue;
+            minZ = float.MaxValue; maxZ = float.MinValue;
+
+            foreach (var p in borderPoints)
+            {
+                if (p.x < minX) minX = p.x;
+                if (p.x > maxX) maxX = p.x;
+                if (p.z < minZ) minZ = p.z;
+                if (p.z > maxZ) maxZ = p.z;
             }
         }
+
+        // ───────────────────────────────────────────────────────────
+        // Public utilities
+        // ───────────────────────────────────────────────────────────
 
         public Vector3 GetNearestNode(Vector3 worldPos)
         {
+            // اول از gridData (baked) استفاده کن
             if (gridData != null && gridData.walkableNodes.Count > 0)
-            {
-                Vector3 nearest = gridData.walkableNodes[0];
-                float minDist = Vector3.Distance(worldPos, nearest);
+                return FindNearest(gridData.walkableNodes, worldPos);
 
-                foreach (var node in gridData.walkableNodes)
-                {
-                    float d = Vector3.Distance(worldPos, node);
-                    if (d < minDist)
-                    {
-                        minDist = d;
-                        nearest = node;
-                    }
-                }
+            // اگه bake نشده، از NodeCenters runtime استفاده کن
+            if (NodeCenters.Count > 0)
+                return FindNearest(NodeCenters, worldPos);
 
-                return nearest;
-            }
-
-            Vector3 nearestRuntime = Vector3.zero;
-            float minDistRuntime = float.MaxValue;
-            foreach (var node in NodeCenters)
-            {
-                float d = Vector3.Distance(worldPos, node);
-                if (d < minDistRuntime)
-                {
-                    minDistRuntime = d;
-                    nearestRuntime = node;
-                }
-            }
-
-            return nearestRuntime;
+            return Vector3.zero;
         }
+
+        private static Vector3 FindNearest(List<Vector3> nodes, Vector3 worldPos)
+        {
+            Vector3 nearest = nodes[0];
+            float minDist = Vector3.SqrMagnitude(nodes[0] - worldPos);
+
+            for (int i = 1; i < nodes.Count; i++)
+            {
+                float d = Vector3.SqrMagnitude(nodes[i] - worldPos);
+                if (d < minDist)
+                {
+                    minDist = d;
+                    nearest = nodes[i];
+                }
+            }
+
+            return nearest;
+        }
+
+        // ───────────────────────────────────────────────────────────
+        // Polygon tests
+        // ───────────────────────────────────────────────────────────
 
         bool IsInsidePolygon(Vector3 point)
         {
@@ -375,7 +344,6 @@ namespace _project.Scripts.Editor.MapEditor
                 if (IsInsideHole(point, holePoints))
                     return true;
             }
-
             return false;
         }
 
@@ -398,7 +366,6 @@ namespace _project.Scripts.Editor.MapEditor
 
                 j = i;
             }
-
             return inside;
         }
     }

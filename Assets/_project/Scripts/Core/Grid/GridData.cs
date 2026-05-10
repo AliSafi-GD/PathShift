@@ -8,10 +8,10 @@ public class GridData : ScriptableObject
     public Vector3 origin;
     public int width;
     public int height;
-    public List<Vector3> walkableNodes = new List<Vector3>();
-    public List<Vector2Int> walkableCells = new List<Vector2Int>();
-    public List<Vector2Int> startPointCells = new List<Vector2Int>();
-    public List<Vector2Int> endPointCells = new List<Vector2Int>();
+    
+    public List<Vector3> walkableNodes;
+    public List<Vector3> startPoints;
+    public List<Vector3> endPoints;
 
     public Vector2Int WorldToGrid(Vector3 worldPos)
     {

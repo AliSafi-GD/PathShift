@@ -57,11 +57,13 @@ namespace _project.Scripts.Core.Map
         {
             var cells = new List<GridCell>();
             int id = 1;
-            foreach (var pos in data.walkableCells)
+            foreach (var worldPos in data.walkableNodes)
             {
+                var gridPos = data.WorldToGrid(worldPos);
                 var cell = new GridCell(
                     id++,
-                    new GridPosition(pos.x, pos.y),
+                    new GridPosition(gridPos.x, gridPos.y),
+                    worldPos,
                     GridCellType.Walkable);
                 cells.Add(cell);
             }
@@ -70,25 +72,37 @@ namespace _project.Scripts.Core.Map
 
         private (int startId, int endId) ResolveEndpoints(GridData data, List<GridCell> cells)
         {
-            if (data.startPointCells.Count == 0 || data.endPointCells.Count == 0)
+            if (data.startPoints.Count == 0 || data.endPoints.Count == 0)
             {
                 Debug.LogError("[MapInstaller] Map has no start/end points!");
                 return (-1, -1);
             }
 
-            var startPos = data.startPointCells[0];
-            var endPos = data.endPointCells[0];
+            var startWorld = data.startPoints[0];
+            var endWorld = data.endPoints[0];
 
-            var startCell = cells.Find(c => c.Position.X == startPos.x && c.Position.Y == startPos.y);
-            var endCell = cells.Find(c => c.Position.X == endPos.x && c.Position.Y == endPos.y);
+            // پیدا کردن نزدیک‌ترین cell به start/end (به جای equality دقیق با float)
+            var startCell = FindNearestCell(cells, startWorld);
+            var endCell = FindNearestCell(cells, endWorld);
 
             if (startCell == null || endCell == null)
             {
-                Debug.LogError("[MapInstaller] Start/End point not found in walkable cells!");
+                Debug.LogError("[MapInstaller] Start/End not found!");
                 return (-1, -1);
             }
-
             return (startCell.Id, endCell.Id);
+        }
+
+        private GridCell FindNearestCell(List<GridCell> cells, Vector3 worldPos)
+        {
+            GridCell nearest = null;
+            float minDist = float.MaxValue;
+            foreach (var cell in cells)
+            {
+                float dist = Vector3.SqrMagnitude(cell.WorldPosition - worldPos);
+                if (dist < minDist) { minDist = dist; nearest = cell; }
+            }
+            return nearest;
         }
     }
 

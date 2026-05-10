@@ -1,4 +1,6 @@
-﻿namespace _project.Scripts.Domain.Grid
+﻿using UnityEngine;
+
+namespace _project.Scripts.Domain.Grid
 {
     public enum GridCellType
     {
@@ -9,25 +11,27 @@
     }
     public class GridCell
     {
-        public int Id {get; private set;}
-        public GridPosition Position { get; }
-        public GridCellType gridCellType { get; private set; }
-
-        public GridCell(int id,GridPosition position,GridCellType gridCellType)
+        public int Id { get; }
+        public GridPosition Position { get; }       // برای A* و logic داخلی
+        public Vector3 WorldPosition { get; }       // ⭐ اضافه میشه - برای view و حرکت
+        public GridCellType GridCellType { get; private set; }
+    
+        public GridCell(int id, GridPosition pos, Vector3 worldPos, GridCellType type)
         {
             Id = id;
-            Position = position;
-            this.gridCellType = gridCellType;
+            Position = pos;
+            WorldPosition = worldPos;
+            GridCellType = type;
         }
 
         public void Block()
         {
-            gridCellType = GridCellType.Block;
+            GridCellType = GridCellType.Block;
         }
 
         public void Unblock()
         {
-            gridCellType = GridCellType.Walkable;
+            GridCellType = GridCellType.Walkable;
         }
     }
 }
