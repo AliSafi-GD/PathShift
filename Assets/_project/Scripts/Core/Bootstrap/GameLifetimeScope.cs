@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
-using _project.Scripts.Core.Enemy;
+﻿using _project.Scripts.Core.Enemy;
 using _project.Scripts.Core.Events.Base;
+using _project.Scripts.Core.Map;
 using _project.Scripts.Core.Pathfinding;
 using _project.Scripts.Core.Pathfinding.Application.AStar;
 using _project.Scripts.Core.Pathfinding.Main;
 using _project.Scripts.Core.Spawner;
 using _project.Scripts.Domain.Grid;
+using _project.Scripts.Domain.Map;
 using _project.Scripts.Presentation;
 using UnityEngine;
 using VContainer;
@@ -13,6 +14,67 @@ using VContainer.Unity;
 
 namespace _project.Scripts.Core.Bootstrap
 {
+    public class GameLifetimeScope : LifetimeScope
+    {
+        [Header("Map")]
+        [SerializeField] private HardcodedMapProvider mapProvider;
+
+        [Header("Game")]
+        [SerializeField] private GameBootstrapper gameBootstrapper;
+        [SerializeField] private PathVisualizer mainPathVisualizer;
+        [SerializeField] private PathVisualizer previewPathVisualizer;
+        [SerializeField] private EnemyFactory enemyFactory;
+        [SerializeField] private MapFactory mapFactory;
+
+        protected override void Configure(IContainerBuilder builder)
+        {
+            // Map system - اول این، چون بقیه بهش وابسته‌ان
+            builder.RegisterComponent<IMapProvider>(mapProvider);
+            builder.RegisterComponent<IMapFactory>(mapFactory);
+            builder.Register<MapInstaller>(Lifetime.Singleton);
+
+            // Map result - با factory delegate ساخته میشه
+            builder.Register(container =>
+            {
+                var installer = container.Resolve<MapInstaller>();
+                return installer.Install();
+            }, Lifetime.Singleton);
+
+            // Grid - از نتیجه‌ی نصب نقشه
+            builder.Register<GridService>(Lifetime.Singleton)
+                .As<IGrid>()
+                .WithParameter(container =>
+                {
+                    var result = container.Resolve<MapInstallResult>();
+                    return result.GridCells;
+                });
+
+            // Path endpoints - از نتیجه‌ی نصب نقشه
+            builder.Register<IPathEndpoints>(container =>
+            {
+                var result = container.Resolve<MapInstallResult>();
+                return new PathEndpoints(result.Endpoints.startId, result.Endpoints.endId);
+            }, Lifetime.Singleton);
+
+            // Pathfinding
+            builder.Register<AStarPathfinder>(Lifetime.Singleton).As<IPathfinder>();
+            builder.Register<PathService>(Lifetime.Singleton).As<IPathService>();
+
+            // Enemies
+            builder.Register<EnemyContainer>(Lifetime.Singleton);
+            builder.Register<EnemySpawner>(Lifetime.Singleton).As<IEnemySpawner>();
+
+            // Events
+            builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
+
+            // Components
+            builder.RegisterComponent(gameBootstrapper);
+            builder.RegisterComponent<IMainPathVisualizer>(mainPathVisualizer);
+            builder.RegisterComponent<IPreviewPathVisualizer>(previewPathVisualizer);
+            builder.RegisterComponent(enemyFactory);
+        }
+    }
+
     public class PathEndpoints : IPathEndpoints
     {
         public PathEndpoints(int startId, int endId)
@@ -21,81 +83,7 @@ namespace _project.Scripts.Core.Bootstrap
             EndId = endId;
         }
 
-        public int StartId { get; private set; }
-        public int EndId { get; private set; }
+        public int StartId { get; }
+        public int EndId { get; }
     }
-    public class GameLifetimeScope : LifetimeScope
-    {
-        [SerializeField] GameBootstrapper gameBootstrapper;
-        [SerializeField] PathVisualizer mainPathVisualizer;
-        [SerializeField] PathVisualizer previewPathVisualizer;
-        [SerializeField] EnemyFactory enemyFactory;
-        [SerializeField] private GridFactory gridFactory;
-        
-        [SerializeField] private int startCellIndex;
-        [SerializeField] private int endCellIndex;
-        
-        IPathEndpoints pathEndpoints;
-        
-        
-        //need a new service for get grid data
-        [SerializeField] GridData gridData;
-
-        private List<GridCell> GetGridCellFromData()
-        {
-            List<Vector2Int> clone = new List<Vector2Int>(gridData.walkableCells);
-            List<GridCell> cells = new List<GridCell>();
-            int id = 1;
-            foreach (var vec in clone)
-            {
-                var cell = new GridCell(id++,new GridPosition(vec.x, vec.y),GridCellType.Walkable);
-                cells.Add(cell);
-            }
-            return cells;
-        }
-        protected override void Configure(IContainerBuilder builder)
-        {
-            var start = gridData.walkableCells.Find(x =>
-                x.x == gridData.startPointCells[0].x || x.y == gridData.startPointCells[0].y);
-            var startIndex = gridData.walkableCells.IndexOf(start);
-            var end = gridData.walkableCells.Find(x =>
-                x.x == gridData.endPointCells[0].x || x.y == gridData.endPointCells[0].y);
-            var endIndex = gridData.walkableCells.IndexOf(end);
-            pathEndpoints = new PathEndpoints(startIndex, endIndex);
-            // Core systems
-            builder.Register<GridService>(Lifetime.Singleton)
-                .As<IGrid>()
-                .WithParameter(GetGridCellFromData);
-            builder.RegisterInstance(pathEndpoints)
-                .As<IPathEndpoints>();
-            builder.Register<AStarPathfinder>(Lifetime.Singleton)
-                .As<IPathfinder>();
-
-            builder.Register<EnemyContainer>(Lifetime.Singleton);
-            builder.Register<PathService>(Lifetime.Singleton)
-                .As<IPathService>();
-
-            builder.Register<GameEventBus>(Lifetime.Singleton)
-                .As<IEventBus>();
-
-
-            builder.Register<CellViewRegistry>(Lifetime.Singleton);
-
-            // Enemy systems
-            builder.Register<EnemySpawner>(Lifetime.Singleton)
-                .As<IEnemySpawner>();
-            
-            builder.RegisterComponent(gameBootstrapper);
-
-            builder.RegisterComponent<IMainPathVisualizer>(mainPathVisualizer);
-
-            builder.RegisterComponent<IPreviewPathVisualizer>(previewPathVisualizer);
-
-            builder.RegisterComponent(gridFactory);
-            builder.RegisterComponent(enemyFactory);
-
-            // builder.RegisterEntryPoint<GridPresenter>();
-        }
-    }
-
 }

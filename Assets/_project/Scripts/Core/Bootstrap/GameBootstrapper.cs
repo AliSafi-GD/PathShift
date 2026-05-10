@@ -37,7 +37,6 @@ namespace _project.Scripts.Core.Bootstrap
             IPathService pathService,
             IEventBus eventBus,
             IEnemySpawner enemySpawner,
-            CellViewRegistry cellViewRegistry,
             IMainPathVisualizer mainPathVisualizer)
         {
             this.grid = grid;
