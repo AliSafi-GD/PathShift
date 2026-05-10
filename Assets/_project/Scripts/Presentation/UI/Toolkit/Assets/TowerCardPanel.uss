@@ -1,0 +1,5 @@
+VisualElement {
+    flex-direction: row;
+    height: 150px;
+    width: 100%;
+}

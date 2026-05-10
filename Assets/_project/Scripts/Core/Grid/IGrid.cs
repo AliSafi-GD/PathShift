@@ -4,11 +4,13 @@ namespace _project.Scripts.Domain.Grid
 {
     public interface IGrid
     {
-        int Width { get; }
-        int Height { get; }
+        // int Width { get; }
+        // int Height { get; }
 
         GridCell GetCell(GridPosition position);
         bool IsInside(GridPosition position);
         List<GridCell> GetAllCells();
+        List<GridCell> GetWalkableCells();
+        void SetWalkable(GridCell gridCell,bool isWalkable);
     }
 }

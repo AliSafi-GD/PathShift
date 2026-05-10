@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6a189fd1c5443928f8419b836113123, type: 3}
+  m_Name: EnemySpawnConfig
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Enemy.EnemySpawnConfig
+  enemyPrefab: {fileID: 5604985608418974826, guid: fca137431ca2f544c9654fb79e6ec28c, type: 3}
+  enemiesPerWave: 5
+  spawnInterval: 1
+  waveInterval: 3

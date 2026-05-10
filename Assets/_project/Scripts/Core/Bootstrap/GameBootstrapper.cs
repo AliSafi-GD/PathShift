@@ -4,83 +4,184 @@ using System.Linq;
 using _project.Scripts.Core.Context;
 using _project.Scripts.Core.Enemy;
 using _project.Scripts.Core.Events.Base;
+using _project.Scripts.Core.Events.GameEventsModel;
+using _project.Scripts.Core.Pathfinding;
 using _project.Scripts.Core.Pathfinding.Application.AStar;
 using _project.Scripts.Core.Pathfinding.Main;
+using _project.Scripts.Core.Spawner;
+using _project.Scripts.Core.Tower;
 using _project.Scripts.Domain.Grid;
+using _project.Scripts.Domain.Interfaces;
+using _project.Scripts.Presentation;
+using _project.Scripts.Presentation.View;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using VContainer;
+using VContainer.Unity;
 using Random = UnityEngine.Random;
 
 namespace _project.Scripts.Core.Bootstrap
 {
     public class GameBootstrapper : MonoBehaviour
     {
-        private ServiceLocator serviceLocator;
-        [SerializeField] private CellView cellView;
-        [SerializeField] private Transform parent;
-        [SerializeField] private EnemyView enemyView;
-        [SerializeField] private int start, end;
+        IGrid grid;
+        IPathService pathService;
+        IEventBus eventBus;
+        IEnemySpawner enemySpawner;
+        CellViewRegistry cellViewRegistry;
+        private IMainPathVisualizer mainPathVisualizer;
+        [Inject]
+        public void Construct(
+            IGrid grid,
+            IPathService pathService,
+            IEventBus eventBus,
+            IEnemySpawner enemySpawner,
+            CellViewRegistry cellViewRegistry,
+            IMainPathVisualizer mainPathVisualizer)
+        {
+            this.grid = grid;
+            this.pathService = pathService;
+            this.eventBus = eventBus;
+            this.enemySpawner = enemySpawner;
+            this.cellViewRegistry = cellViewRegistry;
+            this.mainPathVisualizer = mainPathVisualizer;
+        }
+
+
+        private void Start()
+        {
+            InitializeGame();
+        }
+
+        void InitializeGame()
+        {
+            var walkableCells = grid.GetWalkableCells();
+
+            var currentPath = pathService.GetCurrentPath();
+            
+            List<Vector3> vects = new List<Vector3>();
+            foreach (var gridCell in currentPath)
+            {
+                vects.Add(new Vector3(gridCell.Position.X,0f, gridCell.Position.Y));
+            }
+            mainPathVisualizer.Show(vects);
+            //var startCell = walkableCells.Find(x => x.Id == start);
+            //var endCell = walkableCells.Find(x => x.Id == end);
+
+            //var path = pathService.FindPath(startCell, endCell, walkableCells);
+
+            //eventBus.Raise(new UpdatePath(path));
+
+            // enemySpawner.StartSpawning();
+        }
+        private TestInput testInput;
+
         private void Awake()
         {
-            InitializeGameContext();
+            //InitializeGameContext();
+            testInput = new TestInput();
+
+            //testInput.Gameplay.FindPath.performed += OnFindPath;
+            //testInput.Gameplay.SpawnEnemy.performed += OnSpawnEnemy;
+            testInput.Gameplay.MouseClick.performed += MouseClick;
         }
 
-        private void InitializeGameContext()
+        private void MouseClick(InputAction.CallbackContext obj)
         {
-            serviceLocator = new ServiceLocator();
-            serviceLocator.Register<IPathfinder>(new AStarPathfinder());
-            serviceLocator.Register<IEventBus>(new GameEventBus());
-            serviceLocator.Register<IGrid>(new GridService(10,10));
-            
-            
-            //create cell views
-            var cellViewRegistry = new CellViewRegistry();
-            GridFactory gridFactory = new GridFactory(cellView, parent);
-            var gridCells = serviceLocator.Resolve<IGrid>().GetAllCells();
-            var cellViews = gridFactory.CreateVisual(gridCells);
-            cellViewRegistry.CellViews = new Dictionary<int, CellView>(cellViews);
-            serviceLocator.Register<CellViewRegistry>(cellViewRegistry);
-            
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, 1000f))
+            {
+                // بررسی اینکه روی چی خورده
+                var cellView = hit.collider.GetComponent<CellView>();
+                if (cellView != null)
+                {
+
+                    var walkableCells = grid.GetWalkableCells();
+                    walkableCells.Remove(cellView.cell);
+                    //var startCell = walkableCells.Find(x => x.Id == start);
+                    //var endCell = walkableCells.Find(x => x.Id == end);
+                    //var gridCells = pathService.FindPath(startCell, endCell, walkableCells);
+
+                    // if (gridCells != null)
+                    // {
+                    //     if (cellView.cell.IsWalkable)
+                    //     {
+                    //         cellView.Block();
+                    //         var towerView = towerFactory.CreateTower(cellView.transform);
+                    //         towerAttackSystem.towers.Add(new Tower.Tower(towerView.transform.position,
+                    //             1,
+                    //             new ClosestTargetPolicy(),
+                    //             new CannonWeapon(projectileFactory,5)));
+                    //     }
+                    //     else
+                    //     {
+                    //         cellView.UnBlock();
+                    //     }
+                    //
+                    //     gameEventBus.Raise(new UpdatePath(gridCells));
+                        // enemySpawner.RecalculatePaths();
+                    //}
+                }
+            }
         }
 
-        List<PathCell> path = new List<PathCell>();
-        List<Vector3> vector3s = new List<Vector3>();
+        private void OnEnable()
+        {
+            testInput.Enable();
+        }
+
+        private void OnDisable()
+        {
+            testInput.Disable();
+        }
+        
+
+        private CellView cellViewSelected;
+        [SerializeField] private int start;
+        [SerializeField] private int end;
+
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                end = Random.Range(10, 100);
-                vector3s.Clear();
-                var cellViewRegistry = serviceLocator.Resolve<CellViewRegistry>();
-                var pathfinder = serviceLocator.Resolve<IPathfinder>();
-                var gridCells = serviceLocator.Resolve<IGrid>().GetAllCells();
-                var startPathCell = new PathCell(gridCells[start].Position.X, gridCells[start].Position.Y);
-                var endPathCell = new PathCell(gridCells[end].Position.X, gridCells[end].Position.Y);
-                var allPathCells = gridCells.Select(x=>new PathCell(x.Position.X,x.Position.Y)).ToList();
-                path = pathfinder.FindPath(startPathCell, endPathCell, allPathCells);
-                
-                foreach (var keyValuePair in cellViewRegistry.CellViews)
-                {
-                    keyValuePair.Value.GetComponent<Renderer>().material.color = Color.white;        
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            RaycastHit hit;
 
-                }
-                foreach (var pathCell in path)
-                {
-                    foreach (var gridCell in gridCells)
-                    {
-                        if (gridCell.Position.X == pathCell.X && gridCell.Position.Y == pathCell.Y)
-                        {
-                            cellViewRegistry.CellViews[gridCell.Id].GetComponent<Renderer>().material.color = Color.red;        
-                            vector3s.Add(new Vector3(gridCell.Position.X, 1, gridCell.Position.Y));
-                            break;
-                        }
-                    }
-                }
-            }
-            else if (Input.GetKeyDown(KeyCode.V))
+            if (Physics.Raycast(ray, out hit, 1000f))
             {
-                var enemy = Instantiate(enemyView);
-                enemy.Move(vector3s);
+                var cellView = hit.collider.GetComponent<CellView>();
+                if (cellView != null)
+                {
+                    cellViewSelected?.UnHighlight();
+                    // cellViewSelected?.UnBlock();
+                    cellViewSelected = cellView;
+                    // cellViewSelected.Block();
+                    cellView.Highlight();
+                }
             }
+            else
+            {
+                //cellViewSelected?.UnBlock();
+                //previewPathVisualizer.Hide();
+                cellViewSelected?.UnHighlight();
+            }
+        }
+
+        private void OnSpawnEnemy(InputAction.CallbackContext context)
+        {
+            // var enemy = Instantiate(this.enemy);
+            // var unityMovement = enemy.AddComponent<UnityMovement>();
+            //
+            // List<GridCell> cells = serviceLocator.Resolve<IGrid>().GetWalkableCells();
+            //
+            // var startGridCell = cells.First(x => x.Id == start);
+            // var endGridCell = cells.First(x => x.Id == end);
+            // var pathCells = serviceLocator.Resolve<NavigatorService>().FindPath(startGridCell, endGridCell, cells);
+            // var _currentPath =  new List<GridCell>(pathCells);
+            // unityMovement.SetPath(_currentPath);
+            // unityMovement.Move();
+            // enemy.Move(pathCellView);
         }
     }
 }

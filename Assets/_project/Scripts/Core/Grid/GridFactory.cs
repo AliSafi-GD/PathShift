@@ -5,18 +5,24 @@ namespace _project.Scripts.Domain.Grid
 {
     public class CellViewRegistry
     {
-        public Dictionary<int,CellView> CellViews = new Dictionary<int, CellView>();
-    }
-    public class GridFactory
-    {
-        private CellView prefab;
-        private Transform parent;
+        private readonly Dictionary<int, CellView> cellViews = new();
 
-        public GridFactory(CellView prefab, Transform parent)
+        public void Register(Dictionary<int, CellView> views)
         {
-            this.prefab = prefab;
-            this.parent = parent;
+            cellViews.Clear();
+            foreach (var kv in views)
+                cellViews[kv.Key] = kv.Value;
         }
+
+        public bool TryGet(int cellId, out CellView cellView)
+        {
+            return cellViews.TryGetValue(cellId, out cellView);
+        }
+    }
+    public class GridFactory : MonoBehaviour
+    {
+        [SerializeField] private CellView prefab;
+        [SerializeField] private Transform parent;
 
         public Dictionary<int,CellView> CreateVisual(List<GridCell> cells)
         {
@@ -24,7 +30,9 @@ namespace _project.Scripts.Domain.Grid
             foreach (var gridCell in cells)
             {
                 var position = new Vector3(gridCell.Position.X,0,gridCell.Position.Y);
-                var cellView = GameObject.Instantiate(prefab, position, Quaternion.identity, parent);
+                var cellView = Instantiate(prefab, position, Quaternion.identity, parent);
+                cellView.Init(gridCell);
+                cellView.name = $"Cell id[{gridCell.Id}] POS[{gridCell.Position.X},{gridCell.Position.Y}]";
                 cellViews[gridCell.Id] = cellView;
             }
             return cellViews;
