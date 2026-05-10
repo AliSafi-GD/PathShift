@@ -638,6 +638,7 @@ MonoBehaviour:
   previewPathVisualizer: {fileID: 781774553}
   enemyFactory: {fileID: 1508943223}
   mapFactory: {fileID: 1325772380}
+  enemySpawnConfig: {fileID: 11400000, guid: e68c378d332a34841817ca25727b5f87, type: 2}
 --- !u!1 &781774552
 GameObject:
   m_ObjectHideFlags: 0

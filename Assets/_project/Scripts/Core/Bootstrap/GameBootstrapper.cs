@@ -10,6 +10,7 @@ using _project.Scripts.Core.Pathfinding.Application.AStar;
 using _project.Scripts.Core.Pathfinding.Main;
 using _project.Scripts.Core.Spawner;
 using _project.Scripts.Core.Tower;
+using _project.Scripts.Core.Wave;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Domain.Interfaces;
 using _project.Scripts.Presentation;
@@ -28,7 +29,7 @@ namespace _project.Scripts.Core.Bootstrap
         IGrid grid;
         IPathService pathService;
         IEventBus eventBus;
-        IEnemySpawner enemySpawner;
+        IWaveService waveService;
         CellViewRegistry cellViewRegistry;
         private IMainPathVisualizer mainPathVisualizer;
         [Inject]
@@ -36,14 +37,13 @@ namespace _project.Scripts.Core.Bootstrap
             IGrid grid,
             IPathService pathService,
             IEventBus eventBus,
-            IEnemySpawner enemySpawner,
+            IWaveService waveService,
             IMainPathVisualizer mainPathVisualizer)
         {
             this.grid = grid;
             this.pathService = pathService;
             this.eventBus = eventBus;
-            this.enemySpawner = enemySpawner;
-            this.cellViewRegistry = cellViewRegistry;
+            this.waveService = waveService;
             this.mainPathVisualizer = mainPathVisualizer;
         }
 
@@ -72,7 +72,7 @@ namespace _project.Scripts.Core.Bootstrap
 
             //eventBus.Raise(new UpdatePath(path));
 
-            // enemySpawner.StartSpawning();
+            waveService.Start();
         }
         private TestInput testInput;
 
@@ -141,6 +141,11 @@ namespace _project.Scripts.Core.Bootstrap
         private CellView cellViewSelected;
         [SerializeField] private int start;
         [SerializeField] private int end;
+
+        public GameBootstrapper(IWaveService waveService)
+        {
+            this.waveService = waveService;
+        }
 
         private void Update()
         {

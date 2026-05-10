@@ -16,7 +16,7 @@ namespace _project.Scripts.Core.Enemy
         }
         public Domain.Entitties.Enemy CreateEnemy()
         {
-            EnemyView instance = Instantiate(prefab,startSpawnTransform.position,Quaternion.identity, transform);
+            EnemyView instance = Instantiate(prefab);
             var unityMovement = instance.GetOrAddComponent<UnityMovement>();
             var unityHealth = instance.GetOrAddComponent<UnityHealth>();
             var unityAttacker = instance.GetOrAddComponent<UnityAttacker>();

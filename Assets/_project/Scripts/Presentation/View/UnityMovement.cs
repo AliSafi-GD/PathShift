@@ -30,7 +30,7 @@ namespace _project.Scripts.Presentation.View
             }
             float speed = 3f;
             var nextCell = _pathQueue.Dequeue();
-            var target = new Vector3(nextCell.Position.X, 1, nextCell.Position.Y);
+            var target = nextCell.WorldPosition;
 
             float dist = Vector3.Distance(transform.position, target);
             float duration = dist / speed;

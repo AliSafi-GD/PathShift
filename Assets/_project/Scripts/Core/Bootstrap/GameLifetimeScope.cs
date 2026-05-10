@@ -5,6 +5,7 @@ using _project.Scripts.Core.Pathfinding;
 using _project.Scripts.Core.Pathfinding.Application.AStar;
 using _project.Scripts.Core.Pathfinding.Main;
 using _project.Scripts.Core.Spawner;
+using _project.Scripts.Core.Wave;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Domain.Map;
 using _project.Scripts.Presentation;
@@ -26,6 +27,7 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private EnemyFactory enemyFactory;
         [SerializeField] private MapFactory mapFactory;
 
+        [SerializeField] private EnemySpawnConfig enemySpawnConfig;
         protected override void Configure(IContainerBuilder builder)
         {
             // Map system - اول این، چون بقیه بهش وابسته‌ان
@@ -63,7 +65,7 @@ namespace _project.Scripts.Core.Bootstrap
             // Enemies
             builder.Register<EnemyContainer>(Lifetime.Singleton);
             builder.Register<EnemySpawner>(Lifetime.Singleton).As<IEnemySpawner>();
-
+            builder.Register<WaveService>(Lifetime.Singleton).As<IWaveService>().WithParameter(enemySpawnConfig);
             // Events
             builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
 
