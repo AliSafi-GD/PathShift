@@ -51,7 +51,7 @@ namespace _project.Scripts.Domain.Grid
 
             foreach (var gridCell in cells)
             {
-                if (gridCell.gridCellType != GridCellType.Block)
+                if (gridCell.GridCellType != GridCellType.Block)
                     cellsClone.Add(gridCell);
             }
 
@@ -67,7 +67,7 @@ namespace _project.Scripts.Domain.Grid
             if (!IsInside(pos))
                 return;
 
-            if (gridCell.gridCellType != GridCellType.Walkable)
+            if (gridCell.GridCellType != GridCellType.Walkable)
                 cells[cells.IndexOf(gridCell)].Unblock();
             else
                 cells[cells.IndexOf(gridCell)].Block();

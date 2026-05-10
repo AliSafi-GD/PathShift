@@ -950,7 +950,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!120 &1193014346
 LineRenderer:
   serializedVersion: 3
@@ -1115,7 +1115,7 @@ MonoBehaviour:
   showStartEndPoints: 1
   holeLineRenderers: []
   holeColor: {r: 1, g: 0, b: 0, a: 1}
-  gridData: {fileID: 11400000, guid: 58bc21c19047eb844916c116ce91f0b5, type: 2}
+  gridData: {fileID: 11400000, guid: 55cfea71760495b43bf58e31372672d0, type: 2}
   currentSelectionMode: 0
 --- !u!1 &1274176096
 GameObject:

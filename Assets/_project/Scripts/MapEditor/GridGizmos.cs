@@ -11,32 +11,34 @@ namespace _project.Scripts.Editor.MapEditor
     [RequireComponent(typeof(LineRenderer))]
     public class GridGizmos : MonoBehaviour
     {
-        [Header("Grid Settings")]
-        public float cellSize = 1f;
+        [Header("Grid Settings")] public float cellSize = 1f;
         public Color gridColor = new Color(1f, 1f, 1f, 0.4f);
         public Color borderColor = Color.green;
         public Color nodeColor = Color.cyan;
         public float nodeRadius = 0.1f;
 
-        [Header("Start/End Points")]
-        public Color startPointColor = Color.green;
+        [Header("Start/End Points")] public Color startPointColor = Color.green;
         public Color endPointColor = Color.red;
         public float pointRadius = 0.15f;
         public bool showStartEndPoints = true;
 
-        [Header("Hole Settings")]
-        public LineRenderer[] holeLineRenderers;
+        [Header("Hole Settings")] public LineRenderer[] holeLineRenderers;
         public Color holeColor = Color.red;
 
-        [Header("Grid Data")]
-        public GridData gridData;
+        [Header("Grid Data")] public GridData gridData;
 
         // Editor-time state (هنوز هم لازم برای انتخاب کاربر قبل از Bake)
         public List<Vector3> NodeCenters { get; private set; } = new();
         public List<Vector3> StartPoints { get; private set; } = new();
         public List<Vector3> EndPoints { get; private set; } = new();
 
-        public enum SelectionMode { None, SelectingStart, SelectingEnd }
+        public enum SelectionMode
+        {
+            None,
+            SelectingStart,
+            SelectingEnd
+        }
+
         [HideInInspector] public SelectionMode currentSelectionMode = SelectionMode.None;
 
         private LineRenderer lr;
@@ -72,7 +74,33 @@ namespace _project.Scripts.Editor.MapEditor
         // ───────────────────────────────────────────────────────────
         // Bake
         // ───────────────────────────────────────────────────────────
+#if UNITY_EDITOR
+        private GridData CreateGridDataAsset()
+        {
+            string defaultName = $"GridData_{gameObject.name}";
 
+            string path = EditorUtility.SaveFilePanelInProject(
+                "Save Grid Data",
+                defaultName,
+                "asset",
+                "Choose where to save the GridData asset"
+            );
+
+            if (string.IsNullOrEmpty(path))
+                return null; // کاربر cancel کرده
+
+            var newAsset = ScriptableObject.CreateInstance<GridData>();
+            AssetDatabase.CreateAsset(newAsset, path);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            EditorUtility.SetDirty(this);
+
+            Debug.Log($"[GridGizmos] Created new GridData asset at: {path}");
+
+            return newAsset;
+        }
+#endif
         public void BakeGridData()
         {
             lr = GetComponent<LineRenderer>();
@@ -89,8 +117,17 @@ namespace _project.Scripts.Editor.MapEditor
 
             if (gridData == null)
             {
-                Debug.LogError("GridData asset is not assigned!");
-                return;
+#if UNITY_EDITOR
+                gridData = CreateGridDataAsset();
+                if (gridData == null)
+                {
+                    Debug.Log("[GridGizmos] Bake cancelled by user.");
+                    return;
+                }
+#else
+    Debug.LogError("GridData asset is not assigned!");
+    return;
+#endif
             }
 
             // محدوده گرید
@@ -265,8 +302,10 @@ namespace _project.Scripts.Editor.MapEditor
 
         void CalculateBounds(out float minX, out float maxX, out float minZ, out float maxZ)
         {
-            minX = float.MaxValue; maxX = float.MinValue;
-            minZ = float.MaxValue; maxZ = float.MinValue;
+            minX = float.MaxValue;
+            maxX = float.MinValue;
+            minZ = float.MaxValue;
+            maxZ = float.MinValue;
 
             foreach (var p in borderPoints)
             {
@@ -344,6 +383,7 @@ namespace _project.Scripts.Editor.MapEditor
                 if (IsInsideHole(point, holePoints))
                     return true;
             }
+
             return false;
         }
 
@@ -366,6 +406,7 @@ namespace _project.Scripts.Editor.MapEditor
 
                 j = i;
             }
+
             return inside;
         }
     }

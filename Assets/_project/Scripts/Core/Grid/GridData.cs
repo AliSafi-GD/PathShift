@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GridData : ScriptableObject
@@ -8,10 +7,15 @@ public class GridData : ScriptableObject
     public Vector3 origin;
     public int width;
     public int height;
-    
-    public List<Vector3> walkableNodes;
-    public List<Vector3> startPoints;
-    public List<Vector3> endPoints;
+
+    public List<Vector3> walkableNodes = new List<Vector3>();
+    public List<Vector3> startPoints = new List<Vector3>();
+    public List<Vector3> endPoints = new List<Vector3>();
+
+    // ───────────────────────────────────────────────────────────
+    // Coordinate conversion utilities
+    // (used by editor click-handling and A* pathfinding)
+    // ───────────────────────────────────────────────────────────
 
     public Vector2Int WorldToGrid(Vector3 worldPos)
     {
@@ -30,44 +34,9 @@ public class GridData : ScriptableObject
         );
     }
 
-    public Vector3 GetStartPointWorld(int index)
-    {
-        if (index < 0 || index >= startPointCells.Count)
-            return Vector3.zero;
-        return GridToWorld(startPointCells[index]);
-    }
-
-    public Vector3 GetEndPointWorld(int index)
-    {
-        if (index < 0 || index >= endPointCells.Count)
-            return Vector3.zero;
-        return GridToWorld(endPointCells[index]);
-    }
-
-    public bool IsWalkable(Vector2Int gridPos)
-    {
-        return walkableCells.Contains(gridPos);
-    }
-
-    public List<Vector2Int> GetNeighbors(Vector2Int gridPos)
-    {
-        List<Vector2Int> neighbors = new List<Vector2Int>();
-        Vector2Int[] directions = {
-            new Vector2Int(0, 1),
-            new Vector2Int(1, 0),
-            new Vector2Int(0, -1),
-            new Vector2Int(-1, 0)
-        };
-
-        foreach (var dir in directions)
-        {
-            Vector2Int neighbor = gridPos + dir;
-            if (IsWalkable(neighbor))
-                neighbors.Add(neighbor);
-        }
-
-        return neighbors;
-    }
+    // ───────────────────────────────────────────────────────────
+    // Cloning
+    // ───────────────────────────────────────────────────────────
 
     public GridData Clone()
     {
@@ -77,9 +46,8 @@ public class GridData : ScriptableObject
         clone.width = this.width;
         clone.height = this.height;
         clone.walkableNodes = new List<Vector3>(this.walkableNodes);
-        clone.walkableCells = new List<Vector2Int>(this.walkableCells);
-        clone.startPointCells = new List<Vector2Int>(this.startPointCells);
-        clone.endPointCells = new List<Vector2Int>(this.endPointCells);
+        clone.startPoints = new List<Vector3>(this.startPoints);
+        clone.endPoints = new List<Vector3>(this.endPoints);
         return clone;
     }
 }

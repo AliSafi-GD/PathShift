@@ -62,7 +62,7 @@ namespace _project.Scripts.Core.Bootstrap
             List<Vector3> vects = new List<Vector3>();
             foreach (var gridCell in currentPath)
             {
-                vects.Add(new Vector3(gridCell.Position.X,0f, gridCell.Position.Y));
+                vects.Add(gridCell.WorldPosition);
             }
             mainPathVisualizer.Show(vects);
             //var startCell = walkableCells.Find(x => x.Id == start);
