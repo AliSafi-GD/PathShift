@@ -53,6 +53,10 @@ namespace _project.Scripts.Core.Spawner
                 }
 
                 attacker.Attack(attackable);
+
+                var selfHealth = enemy.GetBehavior<IHealth>();
+                if (selfHealth != null && selfHealth.IsAlive)
+                    selfHealth.TakeDamage(selfHealth.MaxHealth);
             };
 
             var health = enemy.GetBehavior<IHealth>();
