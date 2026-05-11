@@ -30,6 +30,7 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private MainTowerFactory mainTowerFactory;
         [SerializeField] private TowerFactory towerFactory;
         [SerializeField] private TowerAttackSystem towerAttackSystem;
+        [SerializeField] private GameOverController gameOverController;
 
         [SerializeField] private EnemySpawnConfig enemySpawnConfig;
         protected override void Configure(IContainerBuilder builder)
@@ -104,6 +105,9 @@ namespace _project.Scripts.Core.Bootstrap
 
             builder.Register<TowerPlacementService>(Lifetime.Singleton)
                 .As<ITowerPlacementService>();
+
+            // Game over UI
+            builder.RegisterComponent(gameOverController);
         }
     }
 
