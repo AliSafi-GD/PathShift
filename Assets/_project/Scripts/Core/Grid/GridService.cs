@@ -4,73 +4,48 @@ namespace _project.Scripts.Domain.Grid
 {
     public class GridService : IGrid
     {
-        //private readonly GridCell[,] _cells;
+        private readonly List<GridCell> cells;
+        private readonly Dictionary<GridPosition, GridCell> byPosition;
 
-        // public int Width { get; }
-        // public int Height { get; }
-
-        List<GridCell> cells = new List<GridCell>();
         public GridService(List<GridCell> cells)
         {
             this.cells = cells;
-            // InitializeCells();
+            byPosition = new Dictionary<GridPosition, GridCell>(cells.Count);
+            foreach (var c in cells)
+                byPosition[c.Position] = c;
         }
-
-        // private void InitializeCells()
-        // {
-        //     int id = 1;
-        //     for (int x = 0; x < Width; x++)
-        //     {
-        //         for (int y = 0; y < Height; y++)
-        //         {
-        //             var position = new GridPosition(x, y);
-        //             _cells[x, y] = new GridCell(id,position, GridCellType.Walkable);
-        //             id++;
-        //         }
-        //     }
-        // }
 
         public GridCell GetCell(GridPosition position)
         {
-            return null;
+            return byPosition.TryGetValue(position, out var c) ? c : null;
         }
 
         public bool IsInside(GridPosition position)
         {
-            return false;
+            return byPosition.ContainsKey(position);
         }
 
         public List<GridCell> GetAllCells()
         {
-            List<GridCell> clonedCells = new List<GridCell>(cells);
-            return cells;
+            return new List<GridCell>(cells);
         }
+
         public List<GridCell> GetWalkableCells()
         {
-            List<GridCell> cellsClone = new List<GridCell>();
-
-            foreach (var gridCell in cells)
-            {
-                if (gridCell.GridCellType != GridCellType.Block)
-                    cellsClone.Add(gridCell);
-            }
-
-            return cellsClone;
+            var result = new List<GridCell>(cells.Count);
+            foreach (var c in cells)
+                if (c.GridCellType != GridCellType.Block)
+                    result.Add(c);
+            return result;
         }
-        public void SetWalkable(GridCell gridCell,bool isWalkable)
+
+        public void SetWalkable(GridCell gridCell, bool isWalkable)
         {
-            if (gridCell == null)
-                return;
+            if (gridCell == null) return;
+            if (!IsInside(gridCell.Position)) return;
 
-            var pos = gridCell.Position;
-
-            if (!IsInside(pos))
-                return;
-
-            if (gridCell.GridCellType != GridCellType.Walkable)
-                cells[cells.IndexOf(gridCell)].Unblock();
-            else
-                cells[cells.IndexOf(gridCell)].Block();
+            if (isWalkable) gridCell.Unblock();
+            else gridCell.Block();
         }
     }
 }

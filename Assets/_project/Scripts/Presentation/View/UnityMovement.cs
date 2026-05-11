@@ -13,24 +13,55 @@ namespace _project.Scripts.Presentation.View
         private Tweener _tween;
         public GridCell CurrentCell;
         private Queue<GridCell> _pathQueue = new();
-        
+        private bool _isMoving;
+
+        public event Action OnFinishedMove;
+
         public void SetPath(List<GridCell> newPath)
         {
-            if (newPath == null || newPath.Count < 2)
+            if (newPath == null || newPath.Count == 0)
                 return;
 
+            // tween فعلی متوقف بشه چون مسیر عوض شده
+            _tween?.Kill();
+
             _pathQueue = new Queue<GridCell>(newPath);
-            CurrentCell = _pathQueue.Dequeue();
+
+            // اولین سل اگه دقیقاً همون cell فعلی ماست، dequeue کن
+            // در غیر این صورت همه سل‌های مسیر باید پیموده بشن
+            if (_pathQueue.Count > 0 && CurrentCell != null &&
+                _pathQueue.Peek().Id == CurrentCell.Id)
+            {
+                _pathQueue.Dequeue();
+            }
+            else if (CurrentCell == null && _pathQueue.Count > 0)
+            {
+                // اولین بار است (هنوز spawn شده ولی شروع نکرده)
+                CurrentCell = _pathQueue.Dequeue();
+            }
+
+            // اگه قبلاً داشت حرکت میکرد، از سل بعدی ادامه بده
+            if (_isMoving)
+                MoveNext();
+        }
+
+        public void Move()
+        {
+            if (_isMoving) return;
+            _isMoving = true;
+            MoveNext();
         }
 
         private void MoveNext()
         {
             if (_pathQueue.Count == 0)
             {
+                _isMoving = false;
                 OnFinishedMove?.Invoke();
                 return;
             }
-            float speed = 3f;
+
+            const float speed = 3f;
             var nextCell = _pathQueue.Dequeue();
             var target = nextCell.WorldPosition;
 
@@ -43,20 +74,18 @@ namespace _project.Scripts.Presentation.View
                 MoveNext();
             });
         }
+
         private void MoveTo(Vector3 target, float duration, TweenCallback onComplete)
         {
             _tween?.Kill();
-
             _tween = transform.DOMove(target, duration)
                 .SetEase(Ease.Linear)
                 .OnComplete(onComplete);
         }
 
-        public event Action OnFinishedMove;
-
-        public void Move()
+        private void OnDestroy()
         {
-            MoveNext();
+            _tween?.Kill();
         }
     }
 }

@@ -28,6 +28,7 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private EnemyFactory enemyFactory;
         [SerializeField] private MapFactory mapFactory;
         [SerializeField] private MainTowerFactory mainTowerFactory;
+        [SerializeField] private TowerFactory towerFactory;
 
         [SerializeField] private EnemySpawnConfig enemySpawnConfig;
         protected override void Configure(IContainerBuilder builder)
@@ -89,7 +90,21 @@ namespace _project.Scripts.Core.Bootstrap
                 return installer.MapInstance;
             },Lifetime.Singleton);
             
-            
+            // TowerFactory رو که MonoBehaviour هست باید تو inspector serialize کنی
+
+// در Configure:
+builder.RegisterComponent(towerFactory);
+
+// GridData runtime رو هم expose کن چون TowerPlacementService بهش نیاز داره
+builder.Register(container =>
+{
+    var result = container.Resolve<MapInstallResult>();
+    return result.RuntimeGridData;
+}, Lifetime.Singleton);
+
+// خود سرویس
+builder.Register<TowerPlacementService>(Lifetime.Singleton)
+    .As<ITowerPlacementService>();
 
         }
     }

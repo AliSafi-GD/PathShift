@@ -683,6 +683,7 @@ MonoBehaviour:
   enemyFactory: {fileID: 1508943223}
   mapFactory: {fileID: 1325772380}
   mainTowerFactory: {fileID: 183166631}
+  towerFactory: {fileID: 1654010681}
   enemySpawnConfig: {fileID: 11400000, guid: e68c378d332a34841817ca25727b5f87, type: 2}
 --- !u!1 &781774552
 GameObject:
@@ -1192,8 +1193,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c871f443d884c9c8336c79ac0bfb870, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Bootstrap.GameBootstrapper
-  start: 5
-  end: 115
 --- !u!4 &1274176098
 Transform:
   m_ObjectHideFlags: 0

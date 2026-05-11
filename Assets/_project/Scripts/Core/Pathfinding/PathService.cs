@@ -15,11 +15,14 @@ namespace _project.Scripts.Core.Pathfinding
         int StartId { get; }
         int EndId { get; }
     }
+
     public interface IPathService
     {
         List<GridCell> GetCurrentPath();
         void Recalculate();
+        List<GridCell> FindPathFrom(GridCell from);
     }
+
     public class PathService : IPathService, IGameEventListener<GridCell>
     {
         private IPathfinder pathfinder;
@@ -30,7 +33,7 @@ namespace _project.Scripts.Core.Pathfinding
 
         private List<GridCell> _currentPath = new();
 
-        public PathService(IGrid grid, 
+        public PathService(IGrid grid,
             IPathEndpoints pathEndpoints, EnemyContainer container, IPathfinder pathfinder)
         {
             this.grid = grid;
@@ -53,29 +56,62 @@ namespace _project.Scripts.Core.Pathfinding
         public void Recalculate()
         {
             var cells = grid.GetWalkableCells();
-            var start = cells.First(c => c.Id == startId);
-            var end = cells.First(c => c.Id == endId);
+            var startCell = cells.FirstOrDefault(c => c.Id == startId);
+            var endCell = cells.FirstOrDefault(c => c.Id == endId);
 
-            var newPath = FindPath(start, end, cells);
-            if (newPath == null || newPath.Count == 0)
+            if (startCell == null || endCell == null) return;
+
+            // مسیر مرجع از start تا end (برای enemyهای جدید)
+            var refPath = FindPath(startCell, endCell, cells);
+            if (refPath == null || refPath.Count == 0)
                 return;
 
-            _currentPath = newPath;
+            _currentPath = refPath;
 
+            // برای هر enemy alive، مسیر از سل فعلی خودش حساب بشه
             foreach (var enemy in enemyContainer.GetAliveEnemies())
-                enemy.GetBehavior<UnityMovement>().SetPath(newPath);
+            {
+                var movement = enemy.GetBehavior<UnityMovement>();
+                if (movement == null) continue;
+
+                var current = movement.CurrentCell;
+                if (current == null) continue;
+
+                var perEnemyPath = FindPathFrom(current);
+                if (perEnemyPath == null || perEnemyPath.Count == 0)
+                    continue;
+
+                movement.SetPath(perEnemyPath);
+            }
         }
-        private List<GridCell> FindPath(GridCell startCell,GridCell targetCell,List<GridCell> walkableCell)
+
+        public List<GridCell> FindPathFrom(GridCell from)
+        {
+            if (from == null) return null;
+            var cells = grid.GetWalkableCells();
+
+            // مطمئن شو سل فعلی enemy توی لیست walkable هست
+            // (اگه روش تاور باشه نباید باشه ولی برای امنیت)
+            if (!cells.Any(c => c.Id == from.Id))
+                cells.Add(from);
+
+            var endCell = cells.FirstOrDefault(c => c.Id == endId);
+            if (endCell == null) return null;
+
+            return FindPath(from, endCell, cells);
+        }
+
+        private List<GridCell> FindPath(GridCell startCell, GridCell targetCell, List<GridCell> walkableCell)
         {
             var startPathCell = new PathCell(startCell.Position.X, startCell.Position.Y);
             var endPathCell = new PathCell(targetCell.Position.X, targetCell.Position.Y);
 
             var allPathCells = walkableCell.Select(x => new PathCell(x.Position.X, x.Position.Y)).ToList();
             var path = pathfinder.FindPath(startPathCell, endPathCell, allPathCells);
-            
-            List<GridCell> gridCellsPath = new List<GridCell>();
-            
-            if(path == null) return null;
+
+            if (path == null) return null;
+
+            var gridCellsPath = new List<GridCell>();
             foreach (var pathCell in path)
             {
                 foreach (var gridCell in walkableCell)
@@ -87,7 +123,7 @@ namespace _project.Scripts.Core.Pathfinding
                     }
                 }
             }
-            return  gridCellsPath;
+            return gridCellsPath;
         }
     }
 }
