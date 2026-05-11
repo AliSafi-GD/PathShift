@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using _project.Scripts.Domain.Interfaces;
+using UnityEngine;
 
 namespace _project.Scripts.Core.Tower
 {
@@ -34,7 +35,8 @@ namespace _project.Scripts.Core.Tower
 
         private void HandleDied()
         {
-            OnDestroyed?.Invoke();
+            Debug.Log("game over");
+            // OnDestroyed?.Invoke();
         }
 
         public T GetBehavior<T>() where T : IBehavior

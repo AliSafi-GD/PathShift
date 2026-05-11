@@ -72,7 +72,7 @@ namespace _project.Scripts.Core.Bootstrap
 
             //eventBus.Raise(new UpdatePath(path));
 
-            _ = waveService.Start();
+            // _ = waveService.Start();
         }
         private TestInput testInput;
 

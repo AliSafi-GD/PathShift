@@ -4,6 +4,7 @@ using _project.Scripts.Core.Pathfinding;
 using _project.Scripts.Core.Tower;
 using _project.Scripts.Domain.Interfaces;
 using _project.Scripts.Presentation.View;
+using UnityEngine;
 
 namespace _project.Scripts.Core.Spawner
 {
@@ -36,8 +37,21 @@ namespace _project.Scripts.Core.Spawner
             unityMovement.Move();
             unityMovement.OnFinishedMove += () =>
             {
-                var en = enemy;
-                en.GetBehavior<IAttacker>().Attack(mainTower.GetBehavior<IAttackable>());
+                var attacker = enemy.GetBehavior<IAttacker>();
+                var attackable = mainTower?.GetBehavior<IAttackable>();
+
+                if (attacker == null)
+                {
+                    Debug.LogError("Enemy has no IAttacker behavior!");
+                    return;
+                }
+                if (attackable == null)
+                {
+                    Debug.LogError("MainTower has no IAttackable behavior!");
+                    return;
+                }
+
+                attacker.Attack(attackable);
             };
             _enemyContainer.AddEnemy(enemy);
         }

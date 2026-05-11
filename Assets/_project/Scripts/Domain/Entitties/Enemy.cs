@@ -30,8 +30,8 @@ namespace _project.Scripts.Domain.Entitties
 
         public T GetBehavior<T>() where T : IBehavior
         {
-            var behavior = behaviours.Find(x=>x.GetType() == typeof(T));
-            return (T)behavior;
+            var behavior = behaviours.Find(b => b is T);
+            return behavior is T t ? t : default;
         }
 
         public IEnemyView GetEnemyView() => enemyView;
