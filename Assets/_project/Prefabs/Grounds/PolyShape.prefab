@@ -2167,6 +2167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bef4cb2584bb4b26bfa65f23efc510e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Domain.Map.MapView
+  mainTowerViewInstance: {fileID: 6765872625239378345}
 --- !u!1001 &860171525095948672
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2251,7 +2252,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1917308456298122, guid: a58630313e0f32e4f9b876dbc6d37657, type: 3}
       propertyPath: m_Name
-      value: TB_Barracks_Lvl4B
+      value: MainTower
       objectReference: {fileID: 0}
     - target: {fileID: 4118896704551522, guid: a58630313e0f32e4f9b876dbc6d37657, type: 3}
       propertyPath: m_LocalScale.x
@@ -2356,10 +2357,30 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1917308456298122, guid: a58630313e0f32e4f9b876dbc6d37657, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6765872625239378345}
   m_SourcePrefab: {fileID: 100100000, guid: a58630313e0f32e4f9b876dbc6d37657, type: 3}
 --- !u!4 &3450466618564288006 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4118896704551522, guid: a58630313e0f32e4f9b876dbc6d37657, type: 3}
   m_PrefabInstance: {fileID: 3453177924938556516}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3452828039071171310 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1917308456298122, guid: a58630313e0f32e4f9b876dbc6d37657, type: 3}
+  m_PrefabInstance: {fileID: 3453177924938556516}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6765872625239378345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3452828039071171310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4422b62ddf7c43c7bf3ec879e36b4d7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Presentation.View.MainTowerView

@@ -19,7 +19,7 @@ namespace _project.Scripts.Core.Enemy
             EnemyView instance = Instantiate(prefab, spawnPosition, Quaternion.identity);
             var unityMovement = instance.GetOrAddComponent<UnityMovement>();
             var unityHealth = instance.GetOrAddComponent<UnityHealth>();
-            var unityAttacker = instance.GetOrAddComponent<UnityAttacker>();
+            var unityAttacker = instance.GetOrAddComponent<UnityMeleeAttacker>();
             var unityAttackable = instance.GetOrAddComponent<UnityAttackable>();
             return new Domain.Entitties.Enemy(unityMovement, unityHealth, unityAttackable, unityAttacker, instance);
         }

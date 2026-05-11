@@ -1,11 +1,16 @@
 ﻿using System.Collections.Generic;
+using _project.Scripts.Core.Tower;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Domain.Map;
+using _project.Scripts.Presentation.View;
 using UnityEngine;
 
 namespace _project.Scripts.Core.Map
 {
-    public interface IMapView{}
+    public interface IMapView
+    {
+        IMainTowerView GetMainTowerView();
+    }
     public interface IMapFactory
     {
         IMapView CreateMap(MapConfig mapConfig);

@@ -1,21 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using _project.Scripts.Domain.Interfaces;
-using _project.Scripts.Presentation.View;
-using Unity.VisualScripting;
-using UnityEngine;
 
 namespace _project.Scripts.Core.Tower
 {
-    
-    public class MainTower : MonoBehaviour
+    public interface IMainTowerView { }
+
+    public class MainTower
     {
+        private readonly IHealth health;
+        private readonly IAttackable attackable;
+        private readonly IMainTowerView view;
         private readonly List<IBehavior> behaviours;
 
-        private void Start()
+        public event Action OnDestroyed;
+
+        public IHealth Health => health;
+
+        public MainTower(IHealth health, IAttackable attackable, IMainTowerView view)
         {
-            behaviours.Add(transform.GetOrAddComponent<UnityHealth>());
-            behaviours.Add(transform.GetOrAddComponent<UnityAttackable>());
+            this.health = health;
+            this.attackable = attackable;
+            this.view = view;
+
+            behaviours = new List<IBehavior>
+            {
+                health,
+                attackable
+            };
+
+            this.health.OnDied += HandleDied;
         }
+
+        private void HandleDied()
+        {
+            OnDestroyed?.Invoke();
+        }
+
+        public T GetBehavior<T>() where T : IBehavior
+        {
+            var behavior = behaviours.Find(b => b is T);
+            return behavior is T t ? t : default;
+        }
+
+        public IMainTowerView GetView() => view;
     }
 }

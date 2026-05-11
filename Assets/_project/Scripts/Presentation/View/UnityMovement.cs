@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using _project.Scripts.Core.Enemy;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Domain.Interfaces;
@@ -26,6 +27,7 @@ namespace _project.Scripts.Presentation.View
         {
             if (_pathQueue.Count == 0)
             {
+                OnFinishedMove?.Invoke();
                 return;
             }
             float speed = 3f;
@@ -49,6 +51,8 @@ namespace _project.Scripts.Presentation.View
                 .SetEase(Ease.Linear)
                 .OnComplete(onComplete);
         }
+
+        public event Action OnFinishedMove;
 
         public void Move()
         {

@@ -5,6 +5,7 @@ using _project.Scripts.Core.Pathfinding;
 using _project.Scripts.Core.Pathfinding.Application.AStar;
 using _project.Scripts.Core.Pathfinding.Main;
 using _project.Scripts.Core.Spawner;
+using _project.Scripts.Core.Tower;
 using _project.Scripts.Core.Wave;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Domain.Map;
@@ -26,11 +27,13 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private PathVisualizer previewPathVisualizer;
         [SerializeField] private EnemyFactory enemyFactory;
         [SerializeField] private MapFactory mapFactory;
+        [SerializeField] private MainTowerFactory mainTowerFactory;
 
         [SerializeField] private EnemySpawnConfig enemySpawnConfig;
         protected override void Configure(IContainerBuilder builder)
         {
             // Map system - اول این، چون بقیه بهش وابسته‌ان
+            builder.RegisterComponent<MainTowerFactory>(mainTowerFactory);
             builder.RegisterComponent<IMapProvider>(mapProvider);
             builder.RegisterComponent<IMapFactory>(mapFactory);
             builder.Register<MapInstaller>(Lifetime.Singleton);
@@ -42,6 +45,12 @@ namespace _project.Scripts.Core.Bootstrap
                 return installer.Install();
             }, Lifetime.Singleton);
 
+            builder.Register(container =>
+            {
+                var resolve = container.Resolve<MainTowerFactory>();
+                var mainTower = resolve.Create(container.Resolve<IMapView>().GetMainTowerView());
+                return mainTower;
+            }, Lifetime.Singleton);
             // Grid - از نتیجه‌ی نصب نقشه
             builder.Register<GridService>(Lifetime.Singleton)
                 .As<IGrid>()
@@ -74,6 +83,14 @@ namespace _project.Scripts.Core.Bootstrap
             builder.RegisterComponent<IMainPathVisualizer>(mainPathVisualizer);
             builder.RegisterComponent<IPreviewPathVisualizer>(previewPathVisualizer);
             builder.RegisterComponent(enemyFactory);
+            builder.Register<IMapView>(container =>
+            {
+                var installer = container.Resolve<MapInstallResult>();
+                return installer.MapInstance;
+            },Lifetime.Singleton);
+            
+            
+
         }
     }
 

@@ -24,7 +24,7 @@ namespace _project.Scripts.Domain.Entitties
             behaviours = new List<IBehavior>();
             behaviours.Add(movable);
             behaviours.Add(health);
-            behaviours.Add(attackable);
+            behaviours.Add(attacker);
             behaviours.Add(attackable);
         }
 
