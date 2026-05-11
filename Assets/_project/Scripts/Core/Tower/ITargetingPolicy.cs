@@ -1,14 +1,24 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using _project.Scripts.Core.Enemy;
+using _project.Scripts.Domain.Entitties;
+using _project.Scripts.Domain.Interfaces;
 using UnityEngine;
 
 namespace _project.Scripts.Core.Tower
 {
-   
-
     public interface IProjectileFactory
     {
-        void Create(Vector3 origin, EnemyView target, float damage);
+        void Create(Vector3 origin, Enemy target, float damage);
+    }
+
+    public interface IWeapon
+    {
+        void Fire(Vector3 origin, Enemy target);
+    }
+
+    public interface ITargetingPolicy
+    {
+        Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Enemy> enemies);
     }
 
     public class CannonWeapon : IWeapon
@@ -22,42 +32,34 @@ namespace _project.Scripts.Core.Tower
             this.damage = damage;
         }
 
-        public void Fire(Vector3 origin, EnemyView target)
+        public void Fire(Vector3 origin, Enemy target)
         {
             projectileFactory.Create(origin, target, damage);
         }
     }
 
-    public interface IWeapon
-    {
-        void Fire(Vector3 origin, EnemyView target);
-    }
-
     public class ClosestTargetPolicy : ITargetingPolicy
     {
-        public EnemyView SelectTarget(Vector3 towerPosition, IReadOnlyList<EnemyView> enemies)
+        public Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Enemy> enemies)
         {
-            EnemyView best = null;
-            float minDistance = 2;
+            Enemy best = null;
+            float minSqr = range * range;
 
             foreach (var enemy in enemies)
             {
-                // if (!enemy.IsAlive) continue;
+                var health = enemy.GetBehavior<IHealth>();
+                if (health == null || !health.IsAlive) continue;
 
-                float dist = Vector3.Distance(towerPosition, enemy.transform.position);
-                if (dist < minDistance)
+                if (!(enemy.GetEnemyView() is EnemyView view)) continue;
+
+                float sqr = (view.transform.position - towerPosition).sqrMagnitude;
+                if (sqr <= minSqr)
                 {
-                    minDistance = dist;
+                    minSqr = sqr;
                     best = enemy;
                 }
             }
             return best;
         }
     }
-
-    public interface ITargetingPolicy
-    {
-        EnemyView SelectTarget(Vector3 towerPosition, IReadOnlyList<EnemyView> enemies);
-    }
-
 }
