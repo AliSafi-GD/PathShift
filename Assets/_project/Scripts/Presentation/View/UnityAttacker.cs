@@ -8,7 +8,7 @@ namespace _project.Scripts.Presentation.View
     /// </summary>
     public class UnityMeleeAttacker : MonoBehaviour, IAttacker
     {
-        [SerializeField] private int damage = 10;
+        [SerializeField] private float damage = 10f;
         [SerializeField] private float attackInterval = 1f;
 
         private float cooldown;

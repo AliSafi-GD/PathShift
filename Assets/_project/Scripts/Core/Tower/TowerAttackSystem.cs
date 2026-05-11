@@ -1,24 +1,44 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using _project.Scripts.Core.Enemy;
 using UnityEngine;
+using VContainer;
 
 namespace _project.Scripts.Core.Tower
 {
     public class TowerAttackSystem : MonoBehaviour
     {
-        public List<Tower> towers =  new List<Tower>();
-        // public EnemyService enemyService;
+        private readonly List<Tower> towers = new List<Tower>();
+        private EnemyContainer enemyContainer;
+
+        [Inject]
+        public void Construct(EnemyContainer enemyContainer)
+        {
+            this.enemyContainer = enemyContainer;
+        }
+
+        public void Register(Tower tower)
+        {
+            if (tower == null) return;
+            towers.Add(tower);
+        }
+
+        public void Unregister(Tower tower)
+        {
+            if (tower == null) return;
+            towers.Remove(tower);
+        }
 
         private void Update()
         {
-            float dt = Time.deltaTime;
-            // var enemies = enemyService.GetAliveEnemies();
+            if (enemyContainer == null) return;
+            if (towers.Count == 0) return;
 
-            foreach (var tower in towers)
-            {
-                // tower.Tick(dt, enemies);
-            }
+            float dt = Time.deltaTime;
+            var alive = enemyContainer.GetAliveEnemies();
+            if (alive.Count == 0) return;
+
+            for (int i = 0; i < towers.Count; i++)
+                towers[i].Tick(dt, alive);
         }
     }
-
 }

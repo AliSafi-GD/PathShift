@@ -1,7 +1,7 @@
-﻿namespace _project.Scripts.Domain.Interfaces
+namespace _project.Scripts.Domain.Interfaces
 {
     public interface IAttackable : IBehavior
     {
-        void ReceiveDamage(int damage);
+        void ReceiveDamage(float damage);
     }
 }

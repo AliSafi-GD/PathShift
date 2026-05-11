@@ -14,7 +14,7 @@ namespace _project.Scripts.Presentation.View
             health = this.GetOrAddComponent<UnityHealth>();
         }
 
-        public void ReceiveDamage(int damage)
+        public void ReceiveDamage(float damage)
         {
             if (health == null) return;
             health.TakeDamage(damage);
