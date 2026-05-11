@@ -5,6 +5,7 @@ using _project.Scripts.Core.Tower;
 using _project.Scripts.Domain.Interfaces;
 using _project.Scripts.Presentation.View;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace _project.Scripts.Core.Spawner
 {
@@ -53,6 +54,22 @@ namespace _project.Scripts.Core.Spawner
 
                 attacker.Attack(attackable);
             };
+
+            var health = enemy.GetBehavior<IHealth>();
+            if (health != null)
+            {
+                System.Action onDied = null;
+                onDied = () =>
+                {
+                    health.OnDied -= onDied;
+                    _enemyContainer.RemoveItem(enemy);
+
+                    if (enemy.GetEnemyView() is EnemyView view && view != null)
+                        Object.Destroy(view.gameObject);
+                };
+                health.OnDied += onDied;
+            }
+
             _enemyContainer.AddEnemy(enemy);
         }
     }
