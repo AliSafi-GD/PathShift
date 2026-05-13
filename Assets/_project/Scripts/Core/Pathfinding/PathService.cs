@@ -59,12 +59,19 @@ namespace _project.Scripts.Core.Pathfinding
             var startCell = cells.FirstOrDefault(c => c.Id == startId);
             var endCell = cells.FirstOrDefault(c => c.Id == endId);
 
-            if (startCell == null || endCell == null) return;
+            if (startCell == null || endCell == null)
+            {
+                _currentPath = new List<GridCell>();
+                return;
+            }
 
             // مسیر مرجع از start تا end (برای enemyهای جدید)
             var refPath = FindPath(startCell, endCell, cells);
             if (refPath == null || refPath.Count == 0)
+            {
+                _currentPath = new List<GridCell>();
                 return;
+            }
 
             _currentPath = refPath;
 
