@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using _project.Scripts.Core.Enemy;
 using _project.Scripts.Domain.Entitties;
 using _project.Scripts.Domain.Interfaces;
@@ -8,17 +8,17 @@ namespace _project.Scripts.Core.Tower
 {
     public interface IProjectileFactory
     {
-        void Create(Vector3 origin, Enemy target, float damage);
+        void Create(Vector3 origin, Domain.Entitties.Enemy target, float damage);
     }
 
     public interface IWeapon
     {
-        void Fire(Vector3 origin, Enemy target);
+        void Fire(Vector3 origin, Domain.Entitties.Enemy target);
     }
 
     public interface ITargetingPolicy
     {
-        Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Enemy> enemies);
+        Domain.Entitties.Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Domain.Entitties.Enemy> enemies);
     }
 
     public class CannonWeapon : IWeapon
@@ -32,7 +32,7 @@ namespace _project.Scripts.Core.Tower
             this.damage = damage;
         }
 
-        public void Fire(Vector3 origin, Enemy target)
+        public void Fire(Vector3 origin, Domain.Entitties.Enemy target)
         {
             projectileFactory.Create(origin, target, damage);
         }
@@ -40,9 +40,9 @@ namespace _project.Scripts.Core.Tower
 
     public class ClosestTargetPolicy : ITargetingPolicy
     {
-        public Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Enemy> enemies)
+        public Domain.Entitties.Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Domain.Entitties.Enemy> enemies)
         {
-            Enemy best = null;
+            Domain.Entitties.Enemy best = null;
             float minSqr = range * range;
 
             foreach (var enemy in enemies)

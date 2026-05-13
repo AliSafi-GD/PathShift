@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using _project.Scripts.Domain.Entitties;
 using UnityEngine;
 
@@ -30,7 +30,7 @@ namespace _project.Scripts.Core.Tower
             this.weapon = weapon;
         }
 
-        public void Tick(float deltaTime, IReadOnlyList<Enemy> enemies)
+        public void Tick(float deltaTime, IReadOnlyList<Domain.Entitties.Enemy> enemies)
         {
             cooldownTimer -= deltaTime;
             if (cooldownTimer > 0f) return;

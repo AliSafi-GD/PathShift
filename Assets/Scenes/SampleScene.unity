@@ -488,6 +488,50 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!1 &343164972
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 343164974}
+  - component: {fileID: 343164973}
+  m_Layer: 0
+  m_Name: GameOverController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &343164973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343164972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 980affbbad6bd474d905e0fbe1005d69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Bootstrap.GameOverController
+--- !u!4 &343164974
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343164972}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.09936, z: 4}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,6 +728,8 @@ MonoBehaviour:
   mapFactory: {fileID: 1325772380}
   mainTowerFactory: {fileID: 183166631}
   towerFactory: {fileID: 1654010681}
+  towerAttackSystem: {fileID: 754589841}
+  gameOverController: {fileID: 343164973}
   enemySpawnConfig: {fileID: 11400000, guid: e68c378d332a34841817ca25727b5f87, type: 2}
 --- !u!1 &781774552
 GameObject:
@@ -1448,7 +1494,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84a33908fff746a591624cbd4df10919, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Tower.TowerFactory
-  view: {fileID: -7362942939978537589, guid: e45420fb9648b784f8be0dd1fe42960b, type: 3}
+  viewPrefab: {fileID: -7362942939978537589, guid: e45420fb9648b784f8be0dd1fe42960b, type: 3}
+  defaultConfig: {fileID: 11400000, guid: 8c37a11e402fee34e86b00a23e21128c, type: 2}
+  projectileFactory: {fileID: 1952398816}
 --- !u!1 &1670141006
 GameObject:
   m_ObjectHideFlags: 0
@@ -1484,7 +1532,55 @@ Transform:
   - {fileID: 2036707970}
   - {fileID: 1325772379}
   - {fileID: 183166630}
+  - {fileID: 1952398817}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1952398815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1952398817}
+  - component: {fileID: 1952398816}
+  m_Layer: 0
+  m_Name: ProjectileFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1952398816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1952398815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 471e088361b04e0694d9f838cb02135d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Tower.ProjectileFactory
+  prefab: {fileID: 6595482741032340830, guid: 183664bf8437d1447af2a2ea4e74e5a5, type: 3}
+  projectileSpeed: 12
+  hitRadius: 0.2
+--- !u!4 &1952398817
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1952398815}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1670141007}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2036707969
 GameObject:
@@ -1531,6 +1627,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Tower.ProjectileFactory
   prefab: {fileID: 6595482741032340830, guid: 183664bf8437d1447af2a2ea4e74e5a5, type: 3}
+  projectileSpeed: 12
+  hitRadius: 0.2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1546,3 +1644,4 @@ SceneRoots:
   - {fileID: 1193014347}
   - {fileID: 1479076296}
   - {fileID: 896403511}
+  - {fileID: 343164974}

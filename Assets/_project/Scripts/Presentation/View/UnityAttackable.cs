@@ -18,7 +18,7 @@ namespace _project.Scripts.Presentation.View
         {
             if (health == null) return;
             health.TakeDamage(damage);
-            Debug.Log("received damage: " + damage);
+            Debug.Log($"[{name}] received damage: {damage}  health: {health.CurrentHealth}");
         }
     }
 }

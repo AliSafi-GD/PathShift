@@ -1,4 +1,4 @@
-using _project.Scripts.Core.Enemy;
+﻿using _project.Scripts.Core.Enemy;
 using _project.Scripts.Domain.Entitties;
 using _project.Scripts.Domain.Interfaces;
 using UnityEngine;
@@ -18,7 +18,7 @@ namespace _project.Scripts.Core.Tower
         private float speed;
         private float lifeTimer;
 
-        public void Init(Vector3 origin, Enemy target, float damage, float speed, float hitRadius)
+        public void Init(Vector3 origin, Domain.Entitties.Enemy target, float damage, float speed, float hitRadius)
         {
             transform.position = origin;
             this.damage = damage;
