@@ -21,6 +21,10 @@ namespace _project.Scripts.Core.Pathfinding
         List<GridCell> GetCurrentPath();
         void Recalculate();
         List<GridCell> FindPathFrom(GridCell from);
+
+        // مسیر فرضی اگه یه سل بسته بشه - بدون تغییر state.
+        // برای پیش‌نمایش جایگذاری tower استفاده میشه.
+        List<GridCell> SimulateBlockedPath(GridCell blocked);
     }
 
     public class PathService : IPathService, IGameEventListener<GridCell>
@@ -90,6 +94,22 @@ namespace _project.Scripts.Core.Pathfinding
 
                 movement.SetPath(perEnemyPath);
             }
+        }
+
+        public List<GridCell> SimulateBlockedPath(GridCell blocked)
+        {
+            if (blocked == null) return null;
+            var cells = grid.GetWalkableCells();
+            // یه نسخه از سل‌ها بدون اون سل
+            var filtered = new List<GridCell>(cells.Count);
+            for (int i = 0; i < cells.Count; i++)
+                if (cells[i].Id != blocked.Id) filtered.Add(cells[i]);
+
+            var startCell = filtered.FirstOrDefault(c => c.Id == startId);
+            var endCell = filtered.FirstOrDefault(c => c.Id == endId);
+            if (startCell == null || endCell == null) return null;
+
+            return FindPath(startCell, endCell, filtered);
         }
 
         public List<GridCell> FindPathFrom(GridCell from)

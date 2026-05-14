@@ -1,12 +1,37 @@
+using System.Collections.Generic;
+using _project.Scripts.Core.Cards;
+using _project.Scripts.Core.Economy;
 using _project.Scripts.Core.Pathfinding;
 using _project.Scripts.Domain.Grid;
 using UnityEngine;
 
 namespace _project.Scripts.Core.Tower
 {
+    public enum PlacementFailure
+    {
+        None = 0,
+        NoCard,
+        InvalidCell,
+        WouldBlockPath,
+        NotEnoughCurrency,
+    }
+
+    // نتیجه‌ی یک پیش‌نمایش جایگذاری. غیرتخریبی.
+    public struct PlacementPreview
+    {
+        public bool IsValid;            // همه چک‌ها پاس شد؟
+        public PlacementFailure Failure;
+        public GridCell Cell;           // سل هدف (می‌تونه null باشه اگه خارج گرید)
+        public List<GridCell> Path;     // مسیر فرضی پس از جایگذاری (فقط اگه IsValid)
+    }
+
     public interface ITowerPlacementService
     {
-        bool TryPlaceTower(Vector3 worldPosition, out GridCell placedOn);
+        // پیش‌نمایش غیرتخریبی - state تغییر نمی‌کنه.
+        PlacementPreview Preview(Vector3 worldPosition, TowerCardData card);
+
+        // اجرای واقعی - state تغییر می‌کنه و هزینه کم میشه.
+        bool TryPlaceTower(Vector3 worldPosition, TowerCardData card, out GridCell placedOn, out PlacementFailure failure);
     }
 
     public class TowerPlacementService : ITowerPlacementService
@@ -16,6 +41,7 @@ namespace _project.Scripts.Core.Tower
         private readonly TowerFactory towerFactory;
         private readonly GridData gridData;
         private readonly TowerAttackSystem attackSystem;
+        private readonly IWallet wallet;
 
         private int nextId;
 
@@ -24,39 +50,85 @@ namespace _project.Scripts.Core.Tower
             IPathService pathService,
             TowerFactory towerFactory,
             GridData gridData,
-            TowerAttackSystem attackSystem)
+            TowerAttackSystem attackSystem,
+            IWallet wallet)
         {
             this.grid = grid;
             this.pathService = pathService;
             this.towerFactory = towerFactory;
             this.gridData = gridData;
             this.attackSystem = attackSystem;
+            this.wallet = wallet;
         }
 
-        public bool TryPlaceTower(Vector3 worldPosition, out GridCell placedOn)
+        public PlacementPreview Preview(Vector3 worldPosition, TowerCardData card)
         {
-            placedOn = null;
+            var preview = new PlacementPreview();
+
+            if (card == null || card.TowerConfig == null)
+            {
+                preview.Failure = PlacementFailure.NoCard;
+                return preview;
+            }
 
             var gp = gridData.WorldToGrid(worldPosition);
             var cell = grid.GetCell(new GridPosition(gp.x, gp.y));
+            preview.Cell = cell;
 
-            if (cell == null) return false;
-            if (cell.GridCellType == GridCellType.Block) return false;
-            if (cell.GridCellType == GridCellType.StartPoint) return false;
-            if (cell.GridCellType == GridCellType.EndPoint) return false;
-
-            grid.SetWalkable(cell, false);
-            pathService.Recalculate();
-            var newPath = pathService.GetCurrentPath();
-
-            if (newPath == null || newPath.Count == 0)
+            if (cell == null || cell.GridCellType != GridCellType.Walkable)
             {
-                grid.SetWalkable(cell, true);
-                pathService.Recalculate();
+                preview.Failure = PlacementFailure.InvalidCell;
+                return preview;
+            }
+
+            // پول
+            if (!wallet.CanAfford(card.Cost))
+            {
+                preview.Failure = PlacementFailure.NotEnoughCurrency;
+                return preview;
+            }
+
+            // مسیر — non-mutating
+            var simulated = pathService.SimulateBlockedPath(cell);
+            if (simulated == null || simulated.Count == 0)
+            {
+                preview.Failure = PlacementFailure.WouldBlockPath;
+                return preview;
+            }
+
+            preview.IsValid = true;
+            preview.Path = simulated;
+            return preview;
+        }
+
+        public bool TryPlaceTower(Vector3 worldPosition, TowerCardData card, out GridCell placedOn, out PlacementFailure failure)
+        {
+            placedOn = null;
+            failure = PlacementFailure.None;
+
+            var preview = Preview(worldPosition, card);
+            if (!preview.IsValid)
+            {
+                failure = preview.Failure;
                 return false;
             }
 
-            var (tower, _) = towerFactory.Create(cell.WorldPosition);
+            var cell = preview.Cell;
+
+            // commit
+            grid.SetWalkable(cell, false);
+            pathService.Recalculate();
+
+            if (!wallet.TrySpend(card.Cost))
+            {
+                // race-condition guard: حالت تئوریک، rollback
+                grid.SetWalkable(cell, true);
+                pathService.Recalculate();
+                failure = PlacementFailure.NotEnoughCurrency;
+                return false;
+            }
+
+            var (tower, _) = towerFactory.Create(cell.WorldPosition, card.TowerConfig);
             tower.Id = ++nextId;
             attackSystem.Register(tower);
 

@@ -1,4 +1,6 @@
-﻿using _project.Scripts.Core.Enemy;
+using _project.Scripts.Core.Cards;
+using _project.Scripts.Core.Economy;
+using _project.Scripts.Core.Enemy;
 using _project.Scripts.Core.Events.Base;
 using _project.Scripts.Core.Map;
 using _project.Scripts.Core.Pathfinding;
@@ -10,6 +12,7 @@ using _project.Scripts.Core.Wave;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Domain.Map;
 using _project.Scripts.Presentation;
+using _project.Scripts.UI.Cards;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -30,9 +33,16 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private MainTowerFactory mainTowerFactory;
         [SerializeField] private TowerFactory towerFactory;
         [SerializeField] private TowerAttackSystem towerAttackSystem;
+        [SerializeField] private PlacementPreviewController placementPreviewController;
         [SerializeField] private GameOverController gameOverController;
 
         [SerializeField] private EnemySpawnConfig enemySpawnConfig;
+
+        [Header("Economy / Cards")]
+        [SerializeField] private WalletConfig walletConfig;
+        [SerializeField] private DeckConfig deckConfig;
+        [SerializeField] private TowerCardBarView towerCardBarView;
+
         protected override void Configure(IContainerBuilder builder)
         {
             // Map system - اول این، چون بقیه بهش وابسته‌ان
@@ -91,7 +101,7 @@ namespace _project.Scripts.Core.Bootstrap
                 var installer = container.Resolve<MapInstallResult>();
                 return installer.MapInstance;
             },Lifetime.Singleton);
-            
+
             // Tower system
             builder.RegisterComponent(towerFactory);
             builder.RegisterComponent(towerAttackSystem);
@@ -105,6 +115,27 @@ namespace _project.Scripts.Core.Bootstrap
 
             builder.Register<TowerPlacementService>(Lifetime.Singleton)
                 .As<ITowerPlacementService>();
+
+            if (placementPreviewController != null)
+                builder.RegisterComponent(placementPreviewController);
+
+            // Economy
+            builder.Register<IWallet>(_ => new Wallet(walletConfig), Lifetime.Singleton);
+
+            // Cards
+            builder.RegisterInstance(deckConfig);
+            builder.Register<CardSelectionService>(Lifetime.Singleton)
+                .As<ICardSelectionService>();
+
+            // UI (uGUI) — کارت بار و HUD اقتصاد. هرچی توی صحنه داری Inject میشه.
+            if (towerCardBarView != null) builder.RegisterComponent(towerCardBarView);
+            builder.RegisterBuildCallback(container =>
+            {
+                // Inject روی همه‌ی MonoBehaviour های صحنه که [Inject] دارن
+                // (TowerCardBarView و CurrencyHudView های صحنه).
+                // VContainer به صورت پیش‌فرض همینکار رو با AutoInjectGameObjects انجام میده،
+                // ولی اگه نمی‌خوای روش حساب کنی، تو Awake خودشون هم می‌تونی resolve کنی.
+            });
 
             // Game over UI
             builder.RegisterComponent(gameOverController);
