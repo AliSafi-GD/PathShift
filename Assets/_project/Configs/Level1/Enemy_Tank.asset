@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca86209d9c56ef5499b8bc297f77f31e, type: 3}
+  m_Name: Enemy_Tank
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Enemy.EnemyConfig
+  displayName: Tank
+  icon: {fileID: 0}
+  prefab: {fileID: 7548227504906811834, guid: fca137431ca2f544c9654fb79e6ec28c, type: 3}
+  maxHealth: 200
+  moveSpeed: 1.5
+  damage: 25
+  attackInterval: 1.2
+  killReward:
+    type: 0
+    amount: 40

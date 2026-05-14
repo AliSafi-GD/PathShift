@@ -196,12 +196,17 @@ namespace _project.Scripts.Core.Tower
             }
 
             towerPreviewForCard = card;
-            if (card == null || card.PreviewPrefab == null) return;
+            if (card == null) return;
 
-            towerPreviewInstance = Instantiate(card.PreviewPrefab, towerPreviewParent);
-            // غیرفعالش می‌کنیم تا فقط موقع hover معتبر دیده بشه
+            // اولویت: previewPrefab روی TowerConfig لول پایه → previewPrefab کارت → هیچ‌چی.
+            GameObject prefab = null;
+            var baseCfg = card.GetConfigForLevel(0);
+            if (baseCfg != null && baseCfg.previewPrefab != null) prefab = baseCfg.previewPrefab;
+            if (prefab == null) prefab = card.PreviewPrefab;
+            if (prefab == null) return;
+
+            towerPreviewInstance = Instantiate(prefab, towerPreviewParent);
             towerPreviewInstance.SetActive(false);
-            // غیرفعال‌سازی هر Collider روی preview تا تو raycast دخالت نکنه
             foreach (var col in towerPreviewInstance.GetComponentsInChildren<Collider>(true))
                 col.enabled = false;
         }

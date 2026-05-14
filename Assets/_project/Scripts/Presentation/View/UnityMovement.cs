@@ -14,8 +14,11 @@ namespace _project.Scripts.Presentation.View
         public GridCell CurrentCell;
         private Queue<GridCell> _pathQueue = new();
         private bool _isMoving;
+        private float speed = 3f;
 
         public event Action OnFinishedMove;
+
+        public void SetSpeed(float value) => speed = Mathf.Max(0.01f, value);
 
         public void SetPath(List<GridCell> newPath)
         {
@@ -61,7 +64,6 @@ namespace _project.Scripts.Presentation.View
                 return;
             }
 
-            const float speed = 3f;
             var nextCell = _pathQueue.Dequeue();
             var target = nextCell.WorldPosition;
 

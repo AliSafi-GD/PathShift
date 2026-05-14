@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed26936ee897a2f4e9607599ee323857, type: 3}
+  m_Name: Wave_03
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Wave.WaveConfig
+  groups:
+  - enemy: {fileID: 11400000, guid: 34bdc2c2dce26d24fb1dd4d529209b39, type: 2}
+    count: 8
+    interval: 0.5
+    delayBefore: 0
+  - enemy: {fileID: 11400000, guid: 1bf80948c9e6254469ad392b1aae02f8, type: 2}
+    count: 4
+    interval: 0.4
+    delayBefore: 1.5
+  - enemy: {fileID: 11400000, guid: 70cd10058f851a64d80840af75e72e5b, type: 2}
+    count: 2
+    interval: 1.5
+    delayBefore: 3
+  delayAfter: 0

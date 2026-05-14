@@ -13,6 +13,12 @@ namespace _project.Scripts.Presentation.View
 
         private float cooldown;
 
+        public void SetStats(float damage, float attackInterval)
+        {
+            this.damage = damage;
+            this.attackInterval = Mathf.Max(0.01f, attackInterval);
+        }
+
         private void Update()
         {
             if (cooldown > 0f) cooldown -= Time.deltaTime;

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2718689986525528413}
   - component: {fileID: -7362942939978537589}
+  - component: {fileID: 2681755639881062580}
   m_Layer: 0
   m_Name: TowerVIew
   m_TagString: Untagged
@@ -47,6 +48,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 507f7791da9147ce8575c4546bf9e64d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Tower.TowerView
+--- !u!65 &2681755639881062580
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3618828664133854621}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.46941295, y: 1, z: 0.4486552}
+  m_Center: {x: 0, y: 0.99, z: 0}
 --- !u!1001 &198208803297193939
 PrefabInstance:
   m_ObjectHideFlags: 0

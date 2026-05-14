@@ -42,6 +42,7 @@ namespace _project.Scripts.Core.Tower
         private readonly GridData gridData;
         private readonly TowerAttackSystem attackSystem;
         private readonly IWallet wallet;
+        private readonly IPlacedTowerRegistry placedRegistry;
 
         private int nextId;
 
@@ -51,7 +52,8 @@ namespace _project.Scripts.Core.Tower
             TowerFactory towerFactory,
             GridData gridData,
             TowerAttackSystem attackSystem,
-            IWallet wallet)
+            IWallet wallet,
+            IPlacedTowerRegistry placedRegistry)
         {
             this.grid = grid;
             this.pathService = pathService;
@@ -59,6 +61,7 @@ namespace _project.Scripts.Core.Tower
             this.gridData = gridData;
             this.attackSystem = attackSystem;
             this.wallet = wallet;
+            this.placedRegistry = placedRegistry;
         }
 
         public PlacementPreview Preview(Vector3 worldPosition, TowerCardData card)
@@ -128,9 +131,20 @@ namespace _project.Scripts.Core.Tower
                 return false;
             }
 
-            var (tower, _) = towerFactory.Create(cell.WorldPosition, card.TowerConfig);
+            var (tower, view) = towerFactory.Create(cell.WorldPosition, card.TowerConfig);
             tower.Id = ++nextId;
             attackSystem.Register(tower);
+
+            placedRegistry?.Register(new PlacedTower
+            {
+                Tower = tower,
+                View = view,
+                Cell = cell,
+                Card = card,
+                UpgradeLevel = 0,
+                TotalPaid = card.Cost.Amount,
+                Currency = card.Cost.Type,
+            });
 
             placedOn = cell;
             return true;

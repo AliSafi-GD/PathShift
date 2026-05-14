@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed00ff73890b57945bcea1bac2689745, type: 3}
+  m_Name: TowerConfig
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Tower.TowerConfig
+  fireRate: 20
+  damage: 10
+  range: 5
+  projectileSpeed: 12
+  hitRadius: 0.2
+  viewPrefab: {fileID: -7362942939978537589, guid: 01fcc30a1a465234cb210ac1bd776fd5, type: 3}
+  previewPrefab: {fileID: 3618828664133854621, guid: 0eac1a72c1dd282459fe6c7376a11fdc, type: 3}

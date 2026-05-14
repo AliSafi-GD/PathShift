@@ -19,7 +19,10 @@ namespace _project.Scripts.Presentation.View
             get => currentHealth;
             set
             {
-                currentHealth = Mathf.Clamp(value, 0f, maxHealth);
+                var clamped = Mathf.Clamp(value, 0f, maxHealth);
+                if (Mathf.Approximately(clamped, currentHealth)) return;
+                currentHealth = clamped;
+                OnHealthChanged?.Invoke(currentHealth, maxHealth);
                 if (!died && currentHealth <= 0f)
                 {
                     died = true;
@@ -29,10 +32,21 @@ namespace _project.Scripts.Presentation.View
         }
 
         public event Action OnDied;
+        public event Action<float, float> OnHealthChanged;
 
         private void Awake()
         {
             currentHealth = maxHealth;
+        }
+
+        // ست کردن قبل از Awake: مقدار اولیه health هم باهاش پر میشه.
+        // ست کردن بعد از Awake: فقط سقف عوض میشه (currentHealth دست‌نخورده).
+        public void SetMaxHealth(float value, bool resetCurrent = true)
+        {
+            maxHealth = Mathf.Max(1f, value);
+            if (resetCurrent) currentHealth = maxHealth;
+            else currentHealth = Mathf.Min(currentHealth, maxHealth);
+            died = false;
         }
 
         public void TakeDamage(float amount)

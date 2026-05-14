@@ -34,9 +34,11 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private TowerFactory towerFactory;
         [SerializeField] private TowerAttackSystem towerAttackSystem;
         [SerializeField] private PlacementPreviewController placementPreviewController;
+        [SerializeField] private _project.Scripts.UI.Tower.TowerActionsController towerActionsController;
         [SerializeField] private GameOverController gameOverController;
 
-        [SerializeField] private EnemySpawnConfig enemySpawnConfig;
+        [Header("Level / Waves")]
+        [SerializeField] private LevelConfig levelConfig;
 
         [Header("Economy / Cards")]
         [SerializeField] private WalletConfig walletConfig;
@@ -84,10 +86,16 @@ namespace _project.Scripts.Core.Bootstrap
             builder.Register<AStarPathfinder>(Lifetime.Singleton).As<IPathfinder>();
             builder.Register<PathService>(Lifetime.Singleton).As<IPathService>();
 
-            // Enemies
+            // Enemies / waves
+            builder.RegisterInstance(levelConfig);
             builder.Register<EnemyContainer>(Lifetime.Singleton);
             builder.Register<EnemySpawner>(Lifetime.Singleton).As<IEnemySpawner>();
-            builder.Register<WaveService>(Lifetime.Singleton).As<IWaveService>().WithParameter(enemySpawnConfig);
+            builder.Register<WaveService>(Lifetime.Singleton).As<IWaveService>();
+
+            // Stats — IStartable, auto Start() توسط VContainer
+            builder.RegisterEntryPoint<_project.Scripts.Core.Stats.GameStatsService>(Lifetime.Singleton)
+                .AsSelf()
+                .As<_project.Scripts.Core.Stats.IGameStatsService>();
             // Events
             builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
 
@@ -113,14 +121,23 @@ namespace _project.Scripts.Core.Bootstrap
                 return result.RuntimeGridData;
             }, Lifetime.Singleton);
 
+            builder.Register<PlacedTowerRegistry>(Lifetime.Singleton)
+                .As<IPlacedTowerRegistry>();
+
             builder.Register<TowerPlacementService>(Lifetime.Singleton)
                 .As<ITowerPlacementService>();
 
             builder.Register<PlacementCommitter>(Lifetime.Singleton)
                 .As<IPlacementCommitter>();
 
+            builder.Register<TowerActionsService>(Lifetime.Singleton)
+                .As<ITowerActionsService>();
+
             if (placementPreviewController != null)
                 builder.RegisterComponent(placementPreviewController);
+
+            if (towerActionsController != null)
+                builder.RegisterComponent(towerActionsController);
 
             // Economy
             builder.Register<IWallet>(_ => new Wallet(walletConfig), Lifetime.Singleton);
@@ -133,13 +150,14 @@ namespace _project.Scripts.Core.Bootstrap
             // UI (uGUI) — کارت بار و HUD اقتصاد.
             if (towerCardBarView != null) builder.RegisterComponent(towerCardBarView);
 
-            // CurrencyHudView ها هر جای صحنه باشن خودکار رجیستر/Inject میشن
-            // (لازم نیست توی Auto Inject Game Objects دستی اضافه بشن).
+            // HUD‌های صحنه خودکار رجیستر/Inject میشن (لازم نیست دستی توی Auto Inject اضافه بشن).
             foreach (var hud in FindObjectsByType<_project.Scripts.UI.Economy.CurrencyHudView>(
                          FindObjectsInactive.Include, FindObjectsSortMode.None))
-            {
                 builder.RegisterComponent(hud);
-            }
+
+            foreach (var hud in FindObjectsByType<_project.Scripts.UI.Stats.GameStateHudView>(
+                         FindObjectsInactive.Include, FindObjectsSortMode.None))
+                builder.RegisterComponent(hud);
             builder.RegisterBuildCallback(container =>
             {
                 // Inject روی همه‌ی MonoBehaviour های صحنه که [Inject] دارن

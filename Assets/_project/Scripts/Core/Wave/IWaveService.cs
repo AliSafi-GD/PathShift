@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using _project.Scripts.Core.Enemy;
@@ -15,51 +15,93 @@ namespace _project.Scripts.Core.Wave
         Task Start();
         void Stop();
     }
+
     public class WaveService : IWaveService
     {
-        private readonly EnemySpawnConfig _config;
-        private readonly IEnemySpawner _spawner;
-    
+        private readonly LevelConfig level;
+        private readonly IEnemySpawner spawner;
+        private readonly EnemyContainer enemyContainer;
+
         public event Action<int> OnWaveStarted;
         public event Action<int> OnWaveEnded;
         public event Action OnAllWavesCompleted;
 
-        private CancellationTokenSource _cts;
-        private int _currentWave;
+        private CancellationTokenSource cts;
+        private int currentWave;
 
-        public WaveService(EnemySpawnConfig config, IEnemySpawner spawner)
+        public WaveService(LevelConfig level, IEnemySpawner spawner, EnemyContainer enemyContainer)
         {
-            _config = config;
-            _spawner = spawner;
+            this.level = level;
+            this.spawner = spawner;
+            this.enemyContainer = enemyContainer;
         }
 
         public async Task Start()
         {
-            _cts = new CancellationTokenSource();
-            _currentWave = 0;
-
-            while (!_cts.IsCancellationRequested)
+            if (level == null || level.Waves == null || level.Waves.Count == 0)
             {
-                _currentWave++;
-                OnWaveStarted?.Invoke(_currentWave);
-
-                for (int i = 0; i < _config.enemiesPerWave; i++)
-                {
-                    _spawner.SpawnOne();
-                    await Task.Delay(TimeSpan.FromSeconds(_config.spawnInterval), _cts.Token);
-                }
-
-                OnWaveEnded?.Invoke(_currentWave);
-                await Task.Delay(TimeSpan.FromSeconds(_config.waveInterval), _cts.Token);
+                UnityEngine.Debug.LogWarning("WaveService: LevelConfig خالیه.");
+                return;
             }
 
-            OnAllWavesCompleted?.Invoke();
+            cts = new CancellationTokenSource();
+            currentWave = 0;
+
+            try
+            {
+                if (level.StartDelay > 0f)
+                    await Task.Delay(TimeSpan.FromSeconds(level.StartDelay), cts.Token);
+
+                foreach (var wave in level.Waves)
+                {
+                    if (cts.IsCancellationRequested) return;
+                    currentWave++;
+                    OnWaveStarted?.Invoke(currentWave);
+
+                    foreach (var group in wave.Groups)
+                    {
+                        if (cts.IsCancellationRequested) return;
+                        if (group.delayBefore > 0f)
+                            await Task.Delay(TimeSpan.FromSeconds(group.delayBefore), cts.Token);
+
+                        for (int i = 0; i < group.count; i++)
+                        {
+                            if (cts.IsCancellationRequested) return;
+                            spawner.Spawn(group.enemy);
+                            if (group.interval > 0f && i < group.count - 1)
+                                await Task.Delay(TimeSpan.FromSeconds(group.interval), cts.Token);
+                        }
+                    }
+
+                    OnWaveEnded?.Invoke(currentWave);
+
+                    if (wave.DelayAfter > 0f)
+                        await Task.Delay(TimeSpan.FromSeconds(wave.DelayAfter), cts.Token);
+                }
+
+                // همه waves spawn شدن. حالا منتظر بمون تا همه‌ی enemyهای زنده هم تموم بشن.
+                await WaitUntilNoEnemies(cts.Token);
+
+                OnAllWavesCompleted?.Invoke();
+            }
+            catch (TaskCanceledException) { /* normal stop */ }
+        }
+
+        private async Task WaitUntilNoEnemies(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                if (enemyContainer == null || enemyContainer.GetAliveEnemies().Count == 0)
+                    return;
+                await Task.Delay(200, token);
+            }
         }
 
         public void Stop()
         {
-            _cts?.Cancel();
+            cts?.Cancel();
         }
+
         ~WaveService()
         {
             Stop();

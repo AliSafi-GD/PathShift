@@ -6,6 +6,7 @@ using _project.Scripts.Core.Tower;
 using _project.Scripts.Core.Wave;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Presentation;
+using _project.Scripts.UI.Tower;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer;
@@ -20,6 +21,8 @@ namespace _project.Scripts.Core.Bootstrap
         IWaveService waveService;
         IMainPathVisualizer mainPathVisualizer;
         IPlacementCommitter placementCommitter;
+        ICardSelectionService cardSelection;
+        TowerActionsController towerActionsController;
 
         private TestInput testInput;
 
@@ -30,7 +33,9 @@ namespace _project.Scripts.Core.Bootstrap
             IEventBus eventBus,
             IWaveService waveService,
             IMainPathVisualizer mainPathVisualizer,
-            IPlacementCommitter placementCommitter)
+            IPlacementCommitter placementCommitter,
+            ICardSelectionService cardSelection,
+            TowerActionsController towerActionsController)
         {
             this.grid = grid;
             this.pathService = pathService;
@@ -38,6 +43,8 @@ namespace _project.Scripts.Core.Bootstrap
             this.waveService = waveService;
             this.mainPathVisualizer = mainPathVisualizer;
             this.placementCommitter = placementCommitter;
+            this.cardSelection = cardSelection;
+            this.towerActionsController = towerActionsController;
         }
 
         private void Awake()
@@ -73,14 +80,15 @@ namespace _project.Scripts.Core.Bootstrap
 
         private void MouseClick(InputAction.CallbackContext obj)
         {
-            // click flow: کارت انتخاب شده + کلیک روی گرید → کاشت.
-            // drag flow: TowerCardView.OnEndDrag مستقل از این کار می‌کنه.
-            if (placementCommitter == null) return;
+            // اگه کارتی انتخاب شده → تلاش به کاشت.
+            // وگرنه → روتر اکشن tower (popup).
+            if (cardSelection != null && cardSelection.Current != null)
+            {
+                placementCommitter?.TryCommitAtMouse(out _, out _);
+                return;
+            }
 
-            if (placementCommitter.TryCommitAtMouse(out var placedCell, out var failure))
-                Debug.Log($"[Tower] Placed on cell {placedCell.Id}");
-            else if (failure != PlacementFailure.NoCard)
-                Debug.Log($"[Tower] Cannot place here: {failure}");
+            towerActionsController?.HandleWorldClick();
         }
     }
 }
