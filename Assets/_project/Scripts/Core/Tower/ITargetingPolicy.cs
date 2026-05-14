@@ -38,6 +38,33 @@ namespace _project.Scripts.Core.Tower
         }
     }
 
+    // پرتاب قوسی به مکان فعلی هدف، با AoE هنگام برخورد.
+    public class MortarWeapon : IWeapon
+    {
+        private readonly MortarProjectileFactory factory;
+        private readonly float damage;
+        private readonly float splashRadius;
+        private readonly float arcHeight;
+        private readonly float travelTime;
+
+        public MortarWeapon(MortarProjectileFactory factory, float damage,
+                            float splashRadius, float arcHeight, float travelTime)
+        {
+            this.factory = factory;
+            this.damage = damage;
+            this.splashRadius = splashRadius;
+            this.arcHeight = arcHeight;
+            this.travelTime = travelTime;
+        }
+
+        public void Fire(Vector3 origin, Domain.Entitties.Enemy target)
+        {
+            if (factory == null) return;
+            if (!(target.GetEnemyView() is EnemyView view) || view == null) return;
+            factory.Create(origin, view.transform.position, damage, splashRadius, arcHeight, travelTime);
+        }
+    }
+
     public class ClosestTargetPolicy : ITargetingPolicy
     {
         public Domain.Entitties.Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Domain.Entitties.Enemy> enemies)

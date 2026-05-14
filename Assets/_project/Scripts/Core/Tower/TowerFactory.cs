@@ -1,3 +1,5 @@
+using _project.Scripts.Presentation.View;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace _project.Scripts.Core.Tower
@@ -7,6 +9,7 @@ namespace _project.Scripts.Core.Tower
         [SerializeField] private TowerView viewPrefab;
         [SerializeField] private TowerConfig defaultConfig;
         [SerializeField] private ProjectileFactory projectileFactory;
+        [SerializeField] private MortarProjectileFactory mortarProjectileFactory;
 
         public TowerConfig DefaultConfig => defaultConfig;
 
@@ -24,6 +27,12 @@ namespace _project.Scripts.Core.Tower
             var prefab = (config != null && config.viewPrefab != null) ? config.viewPrefab : viewPrefab;
             var view = Instantiate(prefab);
             view.transform.position = worldPosition;
+
+            // drop-from-sky animation: قبل از render اول، position رو بالا ببر و tween کن.
+            var anim = view.gameObject.GetOrAddComponent<TowerSpawnAnimator>();
+            anim.Prepare();
+            anim.Play();
+
             return view;
         }
 
@@ -32,7 +41,11 @@ namespace _project.Scripts.Core.Tower
         {
             var cfg = config != null ? config : defaultConfig;
             var policy = new ClosestTargetPolicy();
-            var weapon = new CannonWeapon(projectileFactory, cfg.damage);
+            IWeapon weapon = cfg.weaponKind == WeaponKind.Mortar
+                ? (IWeapon)new MortarWeapon(mortarProjectileFactory, cfg.damage,
+                                            cfg.splashRadius, cfg.arcHeight, cfg.mortarTravelTime)
+                : new CannonWeapon(projectileFactory, cfg.damage);
+
             return new Tower(
                 position: worldPosition,
                 fireRate: cfg.fireRate,

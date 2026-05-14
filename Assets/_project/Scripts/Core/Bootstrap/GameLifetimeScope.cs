@@ -32,6 +32,7 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private MapFactory mapFactory;
         [SerializeField] private MainTowerFactory mainTowerFactory;
         [SerializeField] private TowerFactory towerFactory;
+        [SerializeField] private MortarProjectileFactory mortarProjectileFactory;
         [SerializeField] private TowerAttackSystem towerAttackSystem;
         [SerializeField] private PlacementPreviewController placementPreviewController;
         [SerializeField] private _project.Scripts.UI.Tower.TowerActionsController towerActionsController;
@@ -113,6 +114,8 @@ namespace _project.Scripts.Core.Bootstrap
             // Tower system
             builder.RegisterComponent(towerFactory);
             builder.RegisterComponent(towerAttackSystem);
+            if (mortarProjectileFactory != null)
+                builder.RegisterComponent(mortarProjectileFactory);
 
             // GridData runtime — needed by TowerPlacementService
             builder.Register(container =>

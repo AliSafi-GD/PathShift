@@ -503,7 +503,7 @@ Transform:
   m_GameObject: {fileID: 208260184}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -2.63, y: 0.06, z: 4.98308}
+  m_LocalPosition: {x: -2.63, y: -0.4, z: 4.98308}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1514,6 +1514,7 @@ MonoBehaviour:
   mapFactory: {fileID: 1325772380}
   mainTowerFactory: {fileID: 183166631}
   towerFactory: {fileID: 1654010681}
+  mortarProjectileFactory: {fileID: 2044204428}
   towerAttackSystem: {fileID: 754589841}
   placementPreviewController: {fileID: 104976142}
   towerActionsController: {fileID: 506028292}
@@ -1671,7 +1672,7 @@ Transform:
   m_GameObject: {fileID: 781774552}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -2.63, y: 0.06, z: 4.98308}
+  m_LocalPosition: {x: -2.63, y: -0.24, z: 4.98308}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3390,6 +3391,7 @@ MonoBehaviour:
   viewPrefab: {fileID: -7362942939978537589, guid: e45420fb9648b784f8be0dd1fe42960b, type: 3}
   defaultConfig: {fileID: 11400000, guid: 8c37a11e402fee34e86b00a23e21128c, type: 2}
   projectileFactory: {fileID: 1952398816}
+  mortarProjectileFactory: {fileID: 2044204428}
 --- !u!1 &1670141006
 GameObject:
   m_ObjectHideFlags: 0
@@ -3426,6 +3428,7 @@ Transform:
   - {fileID: 1325772379}
   - {fileID: 183166630}
   - {fileID: 1952398817}
+  - {fileID: 2044204429}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1699735801
@@ -4016,6 +4019,51 @@ MonoBehaviour:
   prefab: {fileID: 6595482741032340830, guid: 183664bf8437d1447af2a2ea4e74e5a5, type: 3}
   projectileSpeed: 12
   hitRadius: 0.2
+--- !u!1 &2044204427
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2044204429}
+  - component: {fileID: 2044204428}
+  m_Layer: 0
+  m_Name: MortarProjectileFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2044204428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2044204427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74498231ed4905846b4f5f08b7fd8a94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::_project.Scripts.Core.Tower.MortarProjectileFactory
+  prefab: {fileID: 7800330922448311455, guid: a65df32c5a8948c44ba602a7580a3858, type: 3}
+--- !u!4 &2044204429
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2044204427}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1670141007}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2122222020
 GameObject:
   m_ObjectHideFlags: 0

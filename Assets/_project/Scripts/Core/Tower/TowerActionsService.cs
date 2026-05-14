@@ -4,6 +4,7 @@ using _project.Scripts.Core.Economy;
 using _project.Scripts.Core.Pathfinding;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Presentation;
+using _project.Scripts.Presentation.View;
 using UnityEngine;
 
 namespace _project.Scripts.Core.Tower
@@ -99,8 +100,12 @@ namespace _project.Scripts.Core.Tower
             // پول برگرده
             if (refund > 0) wallet.Add(placed.Currency, refund);
 
-            // visual
-            if (placed.View != null) Object.Destroy(placed.View.gameObject);
+            // visual: shrink + spin، بعد destroy
+            if (placed.View != null)
+            {
+                var go = placed.View.gameObject;
+                JuiceFx.DespawnPopUp(go.transform, 0.35f, 0.6f, () => { if (go != null) Object.Destroy(go); });
+            }
 
             RefreshMainPath();
             return true;
@@ -152,7 +157,12 @@ namespace _project.Scripts.Core.Tower
             placed.TotalPaid += step.cost.Amount;
             registry.Register(placed);
 
-            if (oldView != null && oldView != newView) Object.Destroy(oldView.gameObject);
+            // view قدیمی رو با انیمیشن خداحافظی کن (sell/upgrade فرقی نداره visually).
+            if (oldView != null && oldView != newView)
+            {
+                var oldGo = oldView.gameObject;
+                JuiceFx.DespawnShrinkSpin(oldGo.transform, 0.25f, () => { if (oldGo != null) Object.Destroy(oldGo); });
+            }
 
             // ارز ممکنه عوض شده باشه (مثلاً Coin → Gem برای آپگرید)؛ برای سادگی، refund همیشه با ارز اولیه میمونه.
             return true;

@@ -108,8 +108,18 @@ namespace _project.Scripts.Core.Spawner
 
                     OnEnemyDied?.Invoke(config, reachedEnd);
 
-                    if (enemy.GetEnemyView() is EnemyView view && view != null)
-                        Object.Destroy(view.gameObject);
+                    var dyingView = enemy.GetEnemyView() as EnemyView;
+                    if (dyingView != null)
+                    {
+                        var go = dyingView.gameObject;
+                        // اگه به base رسیده بدون انیمیشن حذف بشه (سریع).
+                        // وگرنه (مرگ توسط tower) با انیمیشن خداحافظی.
+                        var deathAnim = go.GetComponent<EnemyDeathAnimator>();
+                        if (!reachedEnd && deathAnim != null)
+                            deathAnim.Play(() => { if (go != null) Object.Destroy(go); });
+                        else
+                            Object.Destroy(go);
+                    }
                 };
                 health.OnDied += onDied;
             }

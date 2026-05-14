@@ -11,10 +11,13 @@ namespace _project.Scripts.Presentation.View
     public class UnityMovement : MonoBehaviour , IMovable
     {
         private Tweener _tween;
+        private Tweener _rotateTween;
         public GridCell CurrentCell;
         private Queue<GridCell> _pathQueue = new();
         private bool _isMoving;
         private float speed = 3f;
+
+        [SerializeField] private float turnDuration = 0.15f;
 
         public event Action OnFinishedMove;
 
@@ -70,6 +73,7 @@ namespace _project.Scripts.Presentation.View
             float dist = Vector3.Distance(transform.position, target);
             float duration = dist / speed;
 
+            FaceTowards(target);
             MoveTo(target, duration, () =>
             {
                 CurrentCell = nextCell;
@@ -85,9 +89,26 @@ namespace _project.Scripts.Presentation.View
                 .OnComplete(onComplete);
         }
 
+        private void FaceTowards(Vector3 target)
+        {
+            var dir = target - transform.position;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.0001f) return;
+
+            var look = Quaternion.LookRotation(dir, Vector3.up);
+            _rotateTween?.Kill();
+            if (turnDuration <= 0f)
+            {
+                transform.rotation = look;
+                return;
+            }
+            _rotateTween = transform.DORotateQuaternion(look, turnDuration).SetEase(Ease.OutCubic);
+        }
+
         private void OnDestroy()
         {
             _tween?.Kill();
+            _rotateTween?.Kill();
         }
     }
 }

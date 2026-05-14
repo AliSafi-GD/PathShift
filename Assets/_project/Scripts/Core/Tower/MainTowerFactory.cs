@@ -8,9 +8,12 @@ namespace _project.Scripts.Core.Tower
     {
         public MainTower Create(IMainTowerView view)
         {
-            var health = ((MainTowerView)view).GetOrAddComponent<UnityHealth>();
-            var attackable = ((MainTowerView)view).GetOrAddComponent<UnityAttackable>();
-            return new MainTower(health, attackable, ((MainTowerView)view));
+            var mb = (MainTowerView)view;
+            var health = mb.GetOrAddComponent<UnityHealth>();
+            var attackable = mb.GetOrAddComponent<UnityAttackable>();
+            // shake/punch روی ضربه خوردن — به IHealth همین آبجکت گوش می‌ده.
+            mb.GetOrAddComponent<DamageFlashAnimator>();
+            return new MainTower(health, attackable, mb);
         }
     }
 }

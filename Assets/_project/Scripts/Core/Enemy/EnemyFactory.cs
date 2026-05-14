@@ -25,6 +25,8 @@ namespace _project.Scripts.Core.Enemy
             spawnAnimator.Prepare();
             // walk anim (روی child visual). اگه child نباشه خود animator skip می‌کنه.
             instance.GetOrAddComponent<EnemyWalkAnimator>();
+            // death anim (spawner از این برای تأخیر Destroy استفاده می‌کنه).
+            instance.GetOrAddComponent<EnemyDeathAnimator>();
 
             var unityMovement = instance.GetOrAddComponent<UnityMovement>();
             var unityHealth = instance.GetOrAddComponent<UnityHealth>();
