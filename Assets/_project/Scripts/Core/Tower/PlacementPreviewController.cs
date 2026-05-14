@@ -9,12 +9,14 @@ using VContainer;
 
 namespace _project.Scripts.Core.Tower
 {
-    // وقتی پلیر یه کارت انتخاب کرده، روی hover یه ghost سبز/قرمز نشون می‌ده
-    // و مسیر فرضی نهایی رو روی preview path visualizer می‌کشه.
+    // وقتی پلیر یه کارت انتخاب کرده (یا داره درگ می‌کنه)، روی hover:
+    //  - یه ghost (Quad سبز/قرمز) برای feedback اعتبار
+    //  - مدل tower (previewPrefab کارت) برای پیش‌نمایش بصری
+    //  - مسیر فرضی روی preview path visualizer
     public class PlacementPreviewController : MonoBehaviour
     {
-        [Header("Ghost")]
-        [SerializeField] private Renderer ghostRenderer;     // مش‌رندرر آبجکت ghost (مثلاً یه Quad/Cube بچه‌ی همین آبجکت)
+        [Header("Ghost (validity feedback)")]
+        [SerializeField] private Renderer ghostRenderer;
         [SerializeField] private Color validColor = new Color(0.2f, 1f, 0.2f, 0.55f);
         [SerializeField] private Color invalidColor = new Color(1f, 0.25f, 0.25f, 0.55f);
         [SerializeField] private float yOffset = 0.05f;
@@ -23,16 +25,22 @@ namespace _project.Scripts.Core.Tower
         [SerializeField] private float rayLength = 1000f;
         [SerializeField] private LayerMask raycastMask = ~0;
 
+        [Header("Tower preview")]
+        [Tooltip("پدر آبجکت‌های پیش‌نمایش tower. اگه خالی باشه، خودِ این آبجکت استفاده میشه.")]
+        [SerializeField] private Transform towerPreviewParent;
+
         private ITowerPlacementService placementService;
         private ICardSelectionService cardSelection;
         private IPreviewPathVisualizer previewPath;
         private Camera mainCamera;
 
-        private GameObject ghostRoot;     // پدر ghostRenderer (برای show/hide)
+        private GameObject ghostRoot;
         private MaterialPropertyBlock mpb;
         private int colorPropId;
 
-        // برای جلوگیری از محاسبه‌ی هر فریم
+        private GameObject towerPreviewInstance;
+        private TowerCardData towerPreviewForCard;
+
         private int lastCellId = int.MinValue;
         private bool lastValid;
         private bool hasGhost;
@@ -52,13 +60,14 @@ namespace _project.Scripts.Core.Tower
         {
             mainCamera = Camera.main;
             mpb = new MaterialPropertyBlock();
-            colorPropId = Shader.PropertyToID("_BaseColor"); // URP. اگه built-in بود "_Color" هم set می‌کنیم پایین.
+            colorPropId = Shader.PropertyToID("_BaseColor");
 
             if (ghostRenderer != null)
             {
                 ghostRoot = ghostRenderer.gameObject;
                 ghostRoot.SetActive(false);
             }
+            if (towerPreviewParent == null) towerPreviewParent = transform;
         }
 
         private void OnEnable()
@@ -74,7 +83,12 @@ namespace _project.Scripts.Core.Tower
             HideAll();
         }
 
-        private void OnSelectionChanged(TowerCardData _) => InvalidateCache();
+        private void OnSelectionChanged(TowerCardData card)
+        {
+            EnsureTowerPreviewFor(card);
+            InvalidateCache();
+            if (card == null) HideAll();
+        }
 
         private void Update()
         {
@@ -85,7 +99,6 @@ namespace _project.Scripts.Core.Tower
                 return;
             }
 
-            // روی UI بود → پنهان کن
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             {
                 HideAll();
@@ -105,14 +118,12 @@ namespace _project.Scripts.Core.Tower
 
             var preview = placementService.Preview(hit.point, card);
 
-            // هیچ سلی نگرفت → پنهان
             if (preview.Cell == null)
             {
                 HideAll();
                 return;
             }
 
-            // فقط وقتی سل/وضعیت عوض شد بازکشی کن (preview path گرونه)
             if (preview.Cell.Id != lastCellId || preview.IsValid != lastValid)
             {
                 lastCellId = preview.Cell.Id;
@@ -121,24 +132,33 @@ namespace _project.Scripts.Core.Tower
             }
             else
             {
-                // فقط موقعیت ghost رو ست کن (اگه قبلاً مخفی شده بوده)
                 if (ghostRoot != null && !ghostRoot.activeSelf) ghostRoot.SetActive(true);
+                if (towerPreviewInstance != null && !towerPreviewInstance.activeSelf) towerPreviewInstance.SetActive(true);
             }
         }
 
         private void ApplyVisuals(PlacementPreview p)
         {
-            // ghost
+            var basePos = p.Cell.WorldPosition;
+
+            // Ghost (validity feedback)
             if (ghostRoot != null)
             {
                 ghostRoot.SetActive(true);
-                var pos = p.Cell.WorldPosition;
+                var pos = basePos;
                 pos.y += yOffset;
                 ghostRoot.transform.position = pos;
             }
             SetGhostColor(p.IsValid ? validColor : invalidColor);
 
-            // مسیر پیش‌نمایش
+            // Tower preview model
+            if (towerPreviewInstance != null)
+            {
+                towerPreviewInstance.SetActive(true);
+                towerPreviewInstance.transform.position = basePos;
+            }
+
+            // Preview path
             if (previewPath != null)
             {
                 if (p.IsValid && p.Path != null && p.Path.Count > 0)
@@ -149,7 +169,6 @@ namespace _project.Scripts.Core.Tower
                 }
                 else
                 {
-                    // مسیر invalid: یه لیست خالی بفرست (یا اگه Hide داشت می‌زدیم)
                     previewPath.Show(new List<Vector3>());
                 }
             }
@@ -162,13 +181,35 @@ namespace _project.Scripts.Core.Tower
             if (ghostRenderer == null) return;
             ghostRenderer.GetPropertyBlock(mpb);
             mpb.SetColor(colorPropId, c);
-            mpb.SetColor("_Color", c); // fallback برای built-in
+            mpb.SetColor("_Color", c);
             ghostRenderer.SetPropertyBlock(mpb);
+        }
+
+        private void EnsureTowerPreviewFor(TowerCardData card)
+        {
+            if (towerPreviewForCard == card) return;
+
+            if (towerPreviewInstance != null)
+            {
+                Destroy(towerPreviewInstance);
+                towerPreviewInstance = null;
+            }
+
+            towerPreviewForCard = card;
+            if (card == null || card.PreviewPrefab == null) return;
+
+            towerPreviewInstance = Instantiate(card.PreviewPrefab, towerPreviewParent);
+            // غیرفعالش می‌کنیم تا فقط موقع hover معتبر دیده بشه
+            towerPreviewInstance.SetActive(false);
+            // غیرفعال‌سازی هر Collider روی preview تا تو raycast دخالت نکنه
+            foreach (var col in towerPreviewInstance.GetComponentsInChildren<Collider>(true))
+                col.enabled = false;
         }
 
         private void HideAll()
         {
             if (ghostRoot != null) ghostRoot.SetActive(false);
+            if (towerPreviewInstance != null) towerPreviewInstance.SetActive(false);
             if (previewPath != null && hasGhost) previewPath.Show(new List<Vector3>());
             hasGhost = false;
             InvalidateCache();

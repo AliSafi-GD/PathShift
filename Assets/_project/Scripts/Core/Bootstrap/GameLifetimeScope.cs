@@ -116,6 +116,9 @@ namespace _project.Scripts.Core.Bootstrap
             builder.Register<TowerPlacementService>(Lifetime.Singleton)
                 .As<ITowerPlacementService>();
 
+            builder.Register<PlacementCommitter>(Lifetime.Singleton)
+                .As<IPlacementCommitter>();
+
             if (placementPreviewController != null)
                 builder.RegisterComponent(placementPreviewController);
 
@@ -127,8 +130,16 @@ namespace _project.Scripts.Core.Bootstrap
             builder.Register<CardSelectionService>(Lifetime.Singleton)
                 .As<ICardSelectionService>();
 
-            // UI (uGUI) — کارت بار و HUD اقتصاد. هرچی توی صحنه داری Inject میشه.
+            // UI (uGUI) — کارت بار و HUD اقتصاد.
             if (towerCardBarView != null) builder.RegisterComponent(towerCardBarView);
+
+            // CurrencyHudView ها هر جای صحنه باشن خودکار رجیستر/Inject میشن
+            // (لازم نیست توی Auto Inject Game Objects دستی اضافه بشن).
+            foreach (var hud in FindObjectsByType<_project.Scripts.UI.Economy.CurrencyHudView>(
+                         FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                builder.RegisterComponent(hud);
+            }
             builder.RegisterBuildCallback(container =>
             {
                 // Inject روی همه‌ی MonoBehaviour های صحنه که [Inject] دارن

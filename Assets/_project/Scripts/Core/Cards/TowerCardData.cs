@@ -19,9 +19,14 @@ namespace _project.Scripts.Core.Cards
         [Header("Gameplay")]
         [SerializeField] private TowerConfig towerConfig;
 
+        [Header("Preview")]
+        [Tooltip("اختیاری. اگه ست بشه موقع پیش‌نمایش، این مدل روی سل هاور‌شده اسپان میشه.")]
+        [SerializeField] private GameObject previewPrefab;
+
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         public Cost Cost => cost;
         public TowerConfig TowerConfig => towerConfig;
+        public GameObject PreviewPrefab => previewPrefab;
     }
 }

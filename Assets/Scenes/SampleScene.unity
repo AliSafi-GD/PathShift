@@ -156,6 +156,7 @@ MonoBehaviour:
   raycastMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  towerPreviewParent: {fileID: 0}
 --- !u!4 &104976143
 Transform:
   m_ObjectHideFlags: 0
