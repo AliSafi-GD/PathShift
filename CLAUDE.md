@@ -84,10 +84,11 @@ Status of the cleanup the team agreed on:
   - `ISceneLoader` + `SceneLoader` wraps `SceneManager.LoadScene` for testability.
   - **Open question / known debt:** `IInputService` not introduced — `MouseInputRouter` still `new`s `TestInput` directly. Revisit when a second input source appears.
   - **Folder/namespace mismatch:** `Core/Map/MapInstaller.cs` lives in `Domain/Map/` folder. Pre-existing inconsistency, left alone to keep blast radius small.
-- [ ] **Phase 3 — Tower & Placement**
-  - Split `TowerAttackSystem` (registry vs. tick loop).
-  - Unify placement under a Command pattern.
-  - Put factories behind interfaces.
+- [x] **Phase 3 — Tower & Placement** *(done)*
+  - `TowerAttackSystem` no longer owns a tower list; it ticks `IPlacedTowerRegistry.All` each frame. `TowerPlacementService` and `TowerActionsService` lost their `attackSystem` dependency.
+  - Factory interfaces introduced: `ITowerFactory`, `IEnemyFactory`, `IMortarProjectileFactory` (`IProjectileFactory` already existed). Concrete `MonoBehaviour` factories now register `.As<IFoo>()` and consumers depend on the interface.
+  - **Diverged from the original plan:** rejected a full Command pattern (no Undo/queueing need today). Instead introduced `PlacementResult` and `TowerActionResult` value types to replace the `bool + out cell + out failure` triplet. Same readability win without ceremony.
+  - Removed dead `EnemyFactory.Setup(Transform)` method.
 - [ ] **Phase 4 — Presentation/View split**
   - Extract pure logic from `UnityHealth`, `UnityMovement`, etc.
   - Animators behind `IAnimatorController`.

@@ -27,8 +27,8 @@ namespace _project.Scripts.Core.Tower
 
         bool TryGetNextUpgrade(PlacedTower placed, out TowerUpgradeStep step);
 
-        bool TrySell(PlacedTower placed, out TowerActionFailure failure);
-        bool TryUpgrade(PlacedTower placed, out TowerActionFailure failure);
+        TowerActionResult TrySell(PlacedTower placed);
+        TowerActionResult TryUpgrade(PlacedTower placed);
     }
 
     public class TowerActionsService : ITowerActionsService
@@ -76,26 +76,22 @@ namespace _project.Scripts.Core.Tower
             return placed.Card.TryGetNextUpgrade(placed.UpgradeLevel, out step);
         }
 
-        public bool TrySell(PlacedTower placed, out TowerActionFailure failure)
+        public TowerActionResult TrySell(PlacedTower placed)
         {
-            failure = TowerActionFailure.None;
-            if (placed == null) { failure = TowerActionFailure.NotFound; return false; }
+            if (placed == null) return TowerActionResult.Fail(TowerActionFailure.NotFound);
 
             int refund = GetSellRefund(placed);
 
             registry.Unregister(placed);
 
-            // grid + path
             if (placed.Cell != null)
             {
                 grid.SetWalkable(placed.Cell, true);
                 pathService.Recalculate();
             }
 
-            // پول برگرده
             if (refund > 0) wallet.Add(placed.Currency, refund);
 
-            // visual: shrink + spin، بعد destroy
             if (placed.View != null)
             {
                 var go = placed.View.gameObject;
@@ -103,28 +99,18 @@ namespace _project.Scripts.Core.Tower
             }
 
             RefreshMainPath();
-            return true;
+            return TowerActionResult.Ok();
         }
 
-        public bool TryUpgrade(PlacedTower placed, out TowerActionFailure failure)
+        public TowerActionResult TryUpgrade(PlacedTower placed)
         {
-            failure = TowerActionFailure.None;
-            if (placed == null) { failure = TowerActionFailure.NotFound; return false; }
+            if (placed == null) return TowerActionResult.Fail(TowerActionFailure.NotFound);
             if (!TryGetNextUpgrade(placed, out var step))
-            {
-                failure = TowerActionFailure.NoUpgradeAvailable;
-                return false;
-            }
+                return TowerActionResult.Fail(TowerActionFailure.NoUpgradeAvailable);
             if (!wallet.CanAfford(step.cost))
-            {
-                failure = TowerActionFailure.NotEnoughCurrency;
-                return false;
-            }
+                return TowerActionResult.Fail(TowerActionFailure.NotEnoughCurrency);
             if (step.towerConfig == null)
-            {
-                failure = TowerActionFailure.NoUpgradeAvailable;
-                return false;
-            }
+                return TowerActionResult.Fail(TowerActionFailure.NoUpgradeAvailable);
 
             wallet.TrySpend(step.cost);
 
@@ -157,8 +143,9 @@ namespace _project.Scripts.Core.Tower
                 JuiceFx.DespawnShrinkSpin(oldGo.transform, 0.25f, () => { if (oldGo != null) Object.Destroy(oldGo); });
             }
 
-            // ارز ممکنه عوض شده باشه (مثلاً Coin → Gem برای آپگرید)؛ برای سادگی، refund همیشه با ارز اولیه میمونه.
-            return true;
+            // Currency may have changed across upgrade tiers (e.g. Coin → Gem); refund
+            // always uses the originally-paid currency, by design.
+            return TowerActionResult.Ok();
         }
 
         private void RefreshMainPath()

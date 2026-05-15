@@ -91,12 +91,13 @@ namespace _project.Scripts.UI.Cards
             if (canvasGroup != null) canvasGroup.alpha = 1f;
             if (committer == null) { selection?.Clear(); return; }
 
-            if (!committer.TryCommitAtMouse(out _, out var failure))
+            var result = committer.TryCommitAtMouse();
+            if (!result.Success)
             {
-                // commit شکست خورد → انتخاب رو پاک کن (کارت برمی‌گرده به deck)
+                // Commit failed: clear the selection so the card returns to the deck.
                 selection?.Clear();
-                if (failure != PlacementFailure.NoCard)
-                    Debug.Log($"[Card] Drop failed: {failure}");
+                if (result.Failure != PlacementFailure.NoCard)
+                    Debug.Log($"[Card] Drop failed: {result.Failure}");
             }
         }
 

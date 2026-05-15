@@ -122,21 +122,22 @@ namespace _project.Scripts.UI.Tower
         private void HandleSell()
         {
             if (current == null) return;
-            actions.TrySell(current, out _);
+            actions.TrySell(current);
             ClosePopup();
         }
 
         private void HandleUpgrade()
         {
             if (current == null) return;
-            if (actions.TryUpgrade(current, out var failure))
+            var result = actions.TryUpgrade(current);
+            if (result.Success)
             {
-                // بعد از آپگرید popup رو دوباره بساز (تا قیمت/افوردابیلیتی آپدیت بشه)
+                // Rebuild the popup so price/affordability reflect the new tier.
                 ShowPopup(current);
             }
             else
             {
-                Debug.Log($"[Upgrade] Failed: {failure}");
+                Debug.Log($"[Upgrade] Failed: {result.Failure}");
             }
         }
     }

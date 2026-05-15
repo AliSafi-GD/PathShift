@@ -27,11 +27,11 @@ namespace _project.Scripts.Core.Tower
 
     public interface ITowerPlacementService
     {
-        // پیش‌نمایش غیرتخریبی - state تغییر نمی‌کنه.
+        // Non-mutating dry run for hover/preview UI.
         PlacementPreview Preview(Vector3 worldPosition, TowerCardData card);
 
-        // اجرای واقعی - state تغییر می‌کنه و هزینه کم میشه.
-        bool TryPlaceTower(Vector3 worldPosition, TowerCardData card, out GridCell placedOn, out PlacementFailure failure);
+        // Mutating commit: takes the cell, spends the cost, registers the tower.
+        PlacementResult TryPlaceTower(Vector3 worldPosition, TowerCardData card);
     }
 
     public class TowerPlacementService : ITowerPlacementService
@@ -101,31 +101,23 @@ namespace _project.Scripts.Core.Tower
             return preview;
         }
 
-        public bool TryPlaceTower(Vector3 worldPosition, TowerCardData card, out GridCell placedOn, out PlacementFailure failure)
+        public PlacementResult TryPlaceTower(Vector3 worldPosition, TowerCardData card)
         {
-            placedOn = null;
-            failure = PlacementFailure.None;
-
             var preview = Preview(worldPosition, card);
             if (!preview.IsValid)
-            {
-                failure = preview.Failure;
-                return false;
-            }
+                return PlacementResult.Fail(preview.Failure);
 
             var cell = preview.Cell;
 
-            // commit
             grid.SetWalkable(cell, false);
             pathService.Recalculate();
 
             if (!wallet.TrySpend(card.Cost))
             {
-                // race-condition guard: حالت تئوریک، rollback
+                // Race-condition guard: theoretical, roll back the grid change.
                 grid.SetWalkable(cell, true);
                 pathService.Recalculate();
-                failure = PlacementFailure.NotEnoughCurrency;
-                return false;
+                return PlacementResult.Fail(PlacementFailure.NotEnoughCurrency);
             }
 
             var (tower, view) = towerFactory.Create(cell.WorldPosition, card.TowerConfig);
@@ -142,8 +134,7 @@ namespace _project.Scripts.Core.Tower
                 Currency = card.Cost.Type,
             });
 
-            placedOn = cell;
-            return true;
+            return PlacementResult.Ok(cell);
         }
     }
 }

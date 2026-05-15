@@ -48,7 +48,7 @@ namespace _project.Scripts.Core.Bootstrap
         {
             if (cardSelection?.Current != null)
             {
-                placementCommitter?.TryCommitAtMouse(out _, out _);
+                placementCommitter?.TryCommitAtMouse();
                 return;
             }
 
