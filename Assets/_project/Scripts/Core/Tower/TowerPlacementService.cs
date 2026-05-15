@@ -38,7 +38,7 @@ namespace _project.Scripts.Core.Tower
     {
         private readonly IGrid grid;
         private readonly IPathService pathService;
-        private readonly TowerFactory towerFactory;
+        private readonly ITowerFactory towerFactory;
         private readonly GridData gridData;
         private readonly IWallet wallet;
         private readonly IPlacedTowerRegistry placedRegistry;
@@ -48,7 +48,7 @@ namespace _project.Scripts.Core.Tower
         public TowerPlacementService(
             IGrid grid,
             IPathService pathService,
-            TowerFactory towerFactory,
+            ITowerFactory towerFactory,
             GridData gridData,
             IWallet wallet,
             IPlacedTowerRegistry placedRegistry)

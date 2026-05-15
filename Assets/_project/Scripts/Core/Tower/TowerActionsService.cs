@@ -37,7 +37,7 @@ namespace _project.Scripts.Core.Tower
         private readonly IWallet wallet;
         private readonly IGrid grid;
         private readonly IPathService pathService;
-        private readonly TowerFactory towerFactory;
+        private readonly ITowerFactory towerFactory;
         private readonly IMainPathVisualizer mainPathVisualizer;
 
         public TowerActionsService(
@@ -45,7 +45,7 @@ namespace _project.Scripts.Core.Tower
             IWallet wallet,
             IGrid grid,
             IPathService pathService,
-            TowerFactory towerFactory,
+            ITowerFactory towerFactory,
             IMainPathVisualizer mainPathVisualizer)
         {
             this.registry = registry;

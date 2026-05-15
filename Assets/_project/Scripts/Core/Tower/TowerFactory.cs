@@ -4,7 +4,15 @@ using UnityEngine;
 
 namespace _project.Scripts.Core.Tower
 {
-    public class TowerFactory : MonoBehaviour
+    public interface ITowerFactory
+    {
+        TowerConfig DefaultConfig { get; }
+        (Tower tower, TowerView view) Create(Vector3 worldPosition, TowerConfig config = null);
+        TowerView SpawnView(Vector3 worldPosition, TowerConfig config);
+        Tower BuildTower(Vector3 worldPosition, TowerConfig config);
+    }
+
+    public class TowerFactory : MonoBehaviour, ITowerFactory
     {
         [SerializeField] private TowerView viewPrefab;
         [SerializeField] private TowerConfig defaultConfig;
@@ -21,14 +29,14 @@ namespace _project.Scripts.Core.Tower
             return (tower, view);
         }
 
-        // فقط view رو اسپان می‌کنه. برای آپگرید (که می‌خوایم view عوض بشه) استفاده میشه.
+        // Spawns only the view (used by upgrade, which swaps the view).
         public TowerView SpawnView(Vector3 worldPosition, TowerConfig config)
         {
             var prefab = (config != null && config.viewPrefab != null) ? config.viewPrefab : viewPrefab;
             var view = Instantiate(prefab);
             view.transform.position = worldPosition;
 
-            // drop-from-sky animation: قبل از render اول، position رو بالا ببر و tween کن.
+            // Drop-from-sky animation: prepare the transform before the first render.
             var anim = view.gameObject.GetOrAddComponent<TowerSpawnAnimator>();
             anim.Prepare();
             anim.Play();
@@ -36,7 +44,7 @@ namespace _project.Scripts.Core.Tower
             return view;
         }
 
-        // فقط دیتای Tower رو می‌سازه (بدون اسپان view). برای آپگرید استفاده میشه.
+        // Builds only the Tower domain model (no view), used by upgrade.
         public Tower BuildTower(Vector3 worldPosition, TowerConfig config)
         {
             var cfg = config != null ? config : defaultConfig;

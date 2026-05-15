@@ -4,7 +4,13 @@ using VContainer;
 
 namespace _project.Scripts.Core.Tower
 {
-    public class MortarProjectileFactory : MonoBehaviour
+    public interface IMortarProjectileFactory
+    {
+        void Create(Vector3 origin, Vector3 targetPosition, float damage,
+                    float splashRadius, float arcHeight, float travelTime);
+    }
+
+    public class MortarProjectileFactory : MonoBehaviour, IMortarProjectileFactory
     {
         [SerializeField] private MortarProjectileView prefab;
         private EnemyContainer enemyContainer;

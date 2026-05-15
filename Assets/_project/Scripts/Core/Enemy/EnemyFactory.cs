@@ -4,28 +4,24 @@ using UnityEngine;
 
 namespace _project.Scripts.Core.Enemy
 {
-    public class EnemyFactory : MonoBehaviour
+    public interface IEnemyFactory
+    {
+        Domain.Entities.Enemy CreateEnemy(Vector3 spawnPosition, EnemyConfig config);
+    }
+
+    public class EnemyFactory : MonoBehaviour, IEnemyFactory
     {
         [SerializeField] private EnemyView fallbackPrefab;
-
-        private Transform startSpawnTransform;
-
-        public void Setup(Transform startSpawnTransform)
-        {
-            this.startSpawnTransform = startSpawnTransform;
-        }
 
         public Domain.Entities.Enemy CreateEnemy(Vector3 spawnPosition, EnemyConfig config)
         {
             var prefab = (config != null && config.Prefab != null) ? config.Prefab : fallbackPrefab;
             EnemyView instance = Instantiate(prefab, spawnPosition, Quaternion.identity);
 
-            // قبل از render اول، اگه spawn animator هست، scale رو صفر کن تا pop نشه.
+            // Prepare spawn animation BEFORE the first render so the scale doesn't pop.
             var spawnAnimator = instance.GetOrAddComponent<EnemySpawnAnimator>();
             spawnAnimator.Prepare();
-            // walk anim (روی child visual). اگه child نباشه خود animator skip می‌کنه.
             instance.GetOrAddComponent<EnemyWalkAnimator>();
-            // death anim (spawner از این برای تأخیر Destroy استفاده می‌کنه).
             instance.GetOrAddComponent<EnemyDeathAnimator>();
 
             var unityMovement = instance.GetOrAddComponent<UnityMovement>();

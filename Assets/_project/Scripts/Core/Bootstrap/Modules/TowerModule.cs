@@ -15,11 +15,11 @@ namespace _project.Scripts.Core.Bootstrap.Modules
             PlacementPreviewController placementPreviewController,
             TowerRangeIndicator towerRangeIndicator)
         {
-            builder.RegisterComponent(towerFactory);
+            builder.RegisterComponent(towerFactory).As<ITowerFactory>();
             builder.RegisterComponent(towerAttackSystem);
 
             if (mortarProjectileFactory != null)
-                builder.RegisterComponent(mortarProjectileFactory);
+                builder.RegisterComponent(mortarProjectileFactory).As<IMortarProjectileFactory>();
 
             builder.Register<PlacedTowerRegistry>(Lifetime.Singleton).As<IPlacedTowerRegistry>();
             builder.Register<TowerPlacementService>(Lifetime.Singleton).As<ITowerPlacementService>();

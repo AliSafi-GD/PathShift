@@ -21,7 +21,7 @@ namespace _project.Scripts.Core.Spawner
 
     public class EnemySpawner : IEnemySpawner
     {
-        private readonly EnemyFactory _factory;
+        private readonly IEnemyFactory _factory;
         private readonly IPathService _pathService;
         private readonly EnemyContainer _enemyContainer;
         private readonly MainTower mainTower;
@@ -31,7 +31,7 @@ namespace _project.Scripts.Core.Spawner
         public event System.Action<EnemyConfig, bool> OnEnemyDied;
 
         public EnemySpawner(
-            EnemyFactory factory,
+            IEnemyFactory factory,
             IPathService pathService,
             EnemyContainer container,
             MainTower mainTower,

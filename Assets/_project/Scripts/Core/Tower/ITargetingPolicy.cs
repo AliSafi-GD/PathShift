@@ -41,13 +41,13 @@ namespace _project.Scripts.Core.Tower
     // پرتاب قوسی به مکان فعلی هدف، با AoE هنگام برخورد.
     public class MortarWeapon : IWeapon
     {
-        private readonly MortarProjectileFactory factory;
+        private readonly IMortarProjectileFactory factory;
         private readonly float damage;
         private readonly float splashRadius;
         private readonly float arcHeight;
         private readonly float travelTime;
 
-        public MortarWeapon(MortarProjectileFactory factory, float damage,
+        public MortarWeapon(IMortarProjectileFactory factory, float damage,
                             float splashRadius, float arcHeight, float travelTime)
         {
             this.factory = factory;

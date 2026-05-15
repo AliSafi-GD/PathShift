@@ -14,7 +14,7 @@ namespace _project.Scripts.Core.Bootstrap.Modules
             EnemyFactory enemyFactory,
             LevelConfig levelConfig)
         {
-            builder.RegisterComponent(enemyFactory);
+            builder.RegisterComponent(enemyFactory).As<IEnemyFactory>();
 
             builder.RegisterInstance(levelConfig);
             builder.Register<EnemyContainer>(Lifetime.Singleton);
