@@ -36,6 +36,7 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private TowerAttackSystem towerAttackSystem;
         [SerializeField] private PlacementPreviewController placementPreviewController;
         [SerializeField] private _project.Scripts.UI.Tower.TowerActionsController towerActionsController;
+        [SerializeField] private _project.Scripts.Presentation.View.TowerRangeIndicator towerRangeIndicator;
         [SerializeField] private GameOverController gameOverController;
 
         [Header("Level / Waves")]
@@ -141,6 +142,9 @@ namespace _project.Scripts.Core.Bootstrap
 
             if (towerActionsController != null)
                 builder.RegisterComponent(towerActionsController);
+
+            if (towerRangeIndicator != null)
+                builder.RegisterComponent(towerRangeIndicator);
 
             // Economy
             builder.Register<IWallet>(_ => new Wallet(walletConfig), Lifetime.Singleton);

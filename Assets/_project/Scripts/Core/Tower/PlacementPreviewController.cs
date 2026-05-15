@@ -32,6 +32,7 @@ namespace _project.Scripts.Core.Tower
         private ITowerPlacementService placementService;
         private ICardSelectionService cardSelection;
         private IPreviewPathVisualizer previewPath;
+        private _project.Scripts.Presentation.View.TowerRangeIndicator rangeIndicator;
         private Camera mainCamera;
 
         private GameObject ghostRoot;
@@ -49,11 +50,13 @@ namespace _project.Scripts.Core.Tower
         public void Construct(
             ITowerPlacementService placementService,
             ICardSelectionService cardSelection,
-            IPreviewPathVisualizer previewPath)
+            IPreviewPathVisualizer previewPath,
+            _project.Scripts.Presentation.View.TowerRangeIndicator rangeIndicator)
         {
             this.placementService = placementService;
             this.cardSelection = cardSelection;
             this.previewPath = previewPath;
+            this.rangeIndicator = rangeIndicator;
         }
 
         private void Awake()
@@ -158,6 +161,20 @@ namespace _project.Scripts.Core.Tower
                 towerPreviewInstance.transform.position = basePos;
             }
 
+            // Range indicator (سبز برای valid، قرمز برای invalid)
+            if (rangeIndicator != null)
+            {
+                var card = cardSelection?.Current;
+                var cfg = card != null ? card.GetConfigForLevel(0) : null;
+                if (cfg != null)
+                {
+                    rangeIndicator.SetColor(p.IsValid
+                        ? new Color(0.3f, 1f, 0.4f, 0.6f)
+                        : new Color(1f, 0.3f, 0.3f, 0.6f));
+                    rangeIndicator.Show(basePos, cfg.range);
+                }
+            }
+
             // Preview path
             if (previewPath != null)
             {
@@ -216,6 +233,7 @@ namespace _project.Scripts.Core.Tower
             if (ghostRoot != null) ghostRoot.SetActive(false);
             if (towerPreviewInstance != null) towerPreviewInstance.SetActive(false);
             if (previewPath != null && hasGhost) previewPath.Show(new List<Vector3>());
+            if (rangeIndicator != null) rangeIndicator.Hide();
             hasGhost = false;
             InvalidateCache();
         }

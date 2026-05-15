@@ -21,6 +21,7 @@ namespace _project.Scripts.UI.Tower
         private ITowerActionsService actions;
         private ICardSelectionService cardSelection;
         private IWallet wallet;
+        private _project.Scripts.Presentation.View.TowerRangeIndicator rangeIndicator;
         private Camera mainCamera;
 
         private PlacedTower current;
@@ -29,11 +30,13 @@ namespace _project.Scripts.UI.Tower
         public void Construct(
             ITowerActionsService actions,
             ICardSelectionService cardSelection,
-            IWallet wallet)
+            IWallet wallet,
+            _project.Scripts.Presentation.View.TowerRangeIndicator rangeIndicator)
         {
             this.actions = actions;
             this.cardSelection = cardSelection;
             this.wallet = wallet;
+            this.rangeIndicator = rangeIndicator;
         }
 
         private void Awake()
@@ -100,12 +103,20 @@ namespace _project.Scripts.UI.Tower
                 var sp = mainCamera.WorldToScreenPoint(placed.View.transform.position);
                 popup.SetScreenPosition(new Vector2(sp.x, sp.y) + screenOffset);
             }
+
+            // range indicator (آبی برای tower انتخاب‌شده)
+            if (rangeIndicator != null && placed.View != null && placed.Tower != null)
+            {
+                rangeIndicator.SetColor(new Color(0.4f, 0.7f, 1f, 0.6f));
+                rangeIndicator.Show(placed.View.transform.position, placed.Tower.Range);
+            }
         }
 
         public void ClosePopup()
         {
             current = null;
             if (popup != null) popup.Hide();
+            if (rangeIndicator != null) rangeIndicator.Hide();
         }
 
         private void HandleSell()
