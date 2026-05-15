@@ -5,7 +5,6 @@ using _project.Scripts.Core.Events.Base;
 using _project.Scripts.Core.Events.GameEventsModel;
 using _project.Scripts.Core.Pathfinding.Main;
 using _project.Scripts.Domain.Grid;
-using _project.Scripts.Presentation.View;
 using UnityEngine;
 
 namespace _project.Scripts.Core.Pathfinding
@@ -82,7 +81,7 @@ namespace _project.Scripts.Core.Pathfinding
             // برای هر enemy alive، مسیر از سل فعلی خودش حساب بشه
             foreach (var enemy in enemyContainer.GetAliveEnemies())
             {
-                var movement = enemy.GetBehavior<UnityMovement>();
+                var movement = enemy.Movement;
                 if (movement == null) continue;
 
                 var current = movement.CurrentCell;

@@ -57,21 +57,21 @@ namespace _project.Scripts.Core.Spawner
 
             bool reachedEnd = false;
 
-            var unityMovement = enemy.GetBehavior<UnityMovement>();
-            unityMovement.SetPath(path);
+            var movement = enemy.Movement;
+            movement.SetPath(path);
 
             // انیمیشن spawn رو اجرا کن؛ بعد از پایان، حرکت شروع بشه.
-            var view = enemy.GetEnemyView() as EnemyView;
+            var view = enemy.View as EnemyView;
             var anim = view != null ? view.GetComponent<EnemySpawnAnimator>() : null;
             if (anim != null)
-                anim.Play().OnComplete(() => unityMovement.Move());
+                anim.Play().OnComplete(() => movement.Move());
             else
-                unityMovement.Move();
+                movement.Move();
 
-            unityMovement.OnFinishedMove += () =>
+            movement.OnFinishedMove += () =>
             {
-                var attacker = enemy.GetBehavior<IAttacker>();
-                var attackable = mainTower?.GetBehavior<IAttackable>();
+                var attacker = enemy.Attacker;
+                var attackable = mainTower?.Attackable;
 
                 if (attacker == null)
                 {
@@ -86,7 +86,7 @@ namespace _project.Scripts.Core.Spawner
 
                 attacker.Attack(attackable);
 
-                var selfHealth = enemy.GetBehavior<IHealth>();
+                var selfHealth = enemy.Health;
                 if (selfHealth != null && selfHealth.IsAlive)
                 {
                     reachedEnd = true;
@@ -94,7 +94,7 @@ namespace _project.Scripts.Core.Spawner
                 }
             };
 
-            var health = enemy.GetBehavior<IHealth>();
+            var health = enemy.Health;
             if (health != null)
             {
                 System.Action onDied = null;
@@ -108,7 +108,7 @@ namespace _project.Scripts.Core.Spawner
 
                     OnEnemyDied?.Invoke(config, reachedEnd);
 
-                    var dyingView = enemy.GetEnemyView() as EnemyView;
+                    var dyingView = enemy.View as EnemyView;
                     if (dyingView != null)
                     {
                         var go = dyingView.gameObject;

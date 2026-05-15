@@ -60,7 +60,7 @@ namespace _project.Scripts.Core.Tower
         public void Fire(Vector3 origin, Domain.Entities.Enemy target)
         {
             if (factory == null) return;
-            if (!(target.GetEnemyView() is EnemyView view) || view == null) return;
+            if (!(target.View is EnemyView view) || view == null) return;
             factory.Create(origin, view.transform.position, damage, splashRadius, arcHeight, travelTime);
         }
     }
@@ -74,10 +74,10 @@ namespace _project.Scripts.Core.Tower
 
             foreach (var enemy in enemies)
             {
-                var health = enemy.GetBehavior<IHealth>();
+                var health = enemy.Health;
                 if (health == null || !health.IsAlive) continue;
 
-                if (!(enemy.GetEnemyView() is EnemyView view)) continue;
+                if (!(enemy.View is EnemyView view)) continue;
 
                 float sqr = (view.transform.position - towerPosition).sqrMagnitude;
                 if (sqr <= minSqr)

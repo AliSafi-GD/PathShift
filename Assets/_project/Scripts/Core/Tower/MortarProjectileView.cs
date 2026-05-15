@@ -38,11 +38,10 @@ namespace _project.Scripts.Core.Tower
                 for (int i = 0; i < alive.Count; i++)
                 {
                     var enemy = alive[i];
-                    if (!(enemy.GetEnemyView() is EnemyView view) || view == null) continue;
+                    if (!(enemy.View is EnemyView view) || view == null) continue;
                     if ((view.transform.position - pos).sqrMagnitude > r2) continue;
 
-                    var att = enemy.GetBehavior<IAttackable>();
-                    att?.ReceiveDamage(damage);
+                    enemy.Attackable?.ReceiveDamage(damage);
                 }
             }
 

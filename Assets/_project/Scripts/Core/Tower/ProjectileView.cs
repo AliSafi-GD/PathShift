@@ -26,10 +26,10 @@ namespace _project.Scripts.Core.Tower
             this.hitRadius = hitRadius > 0f ? hitRadius : this.hitRadius;
             this.lifeTimer = 0f;
 
-            targetHealth = target.GetBehavior<IHealth>();
-            targetAttackable = target.GetBehavior<IAttackable>();
+            targetHealth = target.Health;
+            targetAttackable = target.Attackable;
 
-            if (target.GetEnemyView() is EnemyView view)
+            if (target.View is EnemyView view)
                 targetTransform = view.transform;
         }
 

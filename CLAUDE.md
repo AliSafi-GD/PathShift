@@ -71,10 +71,12 @@ Status of the cleanup the team agreed on:
   - Removed dead `ServiceLocator` and `GridGizmos2`.
   - Fixed `Entitties` → `Entities` and `GridPostion` → `GridPosition` typos.
   - Stripped empty `RegisterBuildCallback` and noise comments from `GameLifetimeScope`.
-- [ ] **Phase 1 — Domain isolation**
-  - Tighten interfaces; remove Unity deps where reasonable.
-  - Replace linear `Enemy.GetBehavior<T>()` with dictionary lookup.
-  - Add unit‑test project for Domain.
+- [x] **Phase 1 — Domain isolation** *(in progress)*
+  - Removed `Enemy.GetBehavior<T>()` and `MainTower.GetBehavior<T>()`. Both entities now expose named properties (`Movement`, `Health`, `Attackable`, `Attacker`, `View`).
+  - Extended `IMovable` with `CurrentCell` and `SetPath` so callers no longer reach into concrete `UnityMovement`.
+  - Cleaned unused usings in touched files.
+  - **Open question / known debt:** `IAttackable.ReceiveDamage` is currently a pass‑through to `IHealth.TakeDamage` (see `UnityAttackable`). Keeping the abstraction in case future shields/armor want to intercept damage before health. Revisit if no second consumer appears.
+  - **Not done this phase:** Unit‑test project for Domain.
 - [ ] **Phase 2 — Bootstrap split**
   - Break `GameLifetimeScope` into per‑module `Installer`s.
   - Split `GameBootstrapper` into `MouseInputRouter` + `GameLoopStarter`.

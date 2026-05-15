@@ -12,7 +12,7 @@ namespace _project.Scripts.Presentation.View
     {
         private Tweener _tween;
         private Tweener _rotateTween;
-        public GridCell CurrentCell;
+        public GridCell CurrentCell { get; private set; }
         private Queue<GridCell> _pathQueue = new();
         private bool _isMoving;
         private float speed = 3f;
@@ -23,7 +23,7 @@ namespace _project.Scripts.Presentation.View
 
         public void SetSpeed(float value) => speed = Mathf.Max(0.01f, value);
 
-        public void SetPath(List<GridCell> newPath)
+        public void SetPath(IReadOnlyList<GridCell> newPath)
         {
             if (newPath == null || newPath.Count == 0)
                 return;
