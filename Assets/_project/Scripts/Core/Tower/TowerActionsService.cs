@@ -37,7 +37,6 @@ namespace _project.Scripts.Core.Tower
         private readonly IWallet wallet;
         private readonly IGrid grid;
         private readonly IPathService pathService;
-        private readonly TowerAttackSystem attackSystem;
         private readonly TowerFactory towerFactory;
         private readonly IMainPathVisualizer mainPathVisualizer;
 
@@ -46,7 +45,6 @@ namespace _project.Scripts.Core.Tower
             IWallet wallet,
             IGrid grid,
             IPathService pathService,
-            TowerAttackSystem attackSystem,
             TowerFactory towerFactory,
             IMainPathVisualizer mainPathVisualizer)
         {
@@ -54,7 +52,6 @@ namespace _project.Scripts.Core.Tower
             this.wallet = wallet;
             this.grid = grid;
             this.pathService = pathService;
-            this.attackSystem = attackSystem;
             this.towerFactory = towerFactory;
             this.mainPathVisualizer = mainPathVisualizer;
         }
@@ -86,8 +83,6 @@ namespace _project.Scripts.Core.Tower
 
             int refund = GetSellRefund(placed);
 
-            // attack system + registry
-            attackSystem.Unregister(placed.Tower);
             registry.Unregister(placed);
 
             // grid + path
@@ -146,10 +141,8 @@ namespace _project.Scripts.Core.Tower
             var newTower = towerFactory.BuildTower(worldPos, step.towerConfig);
             newTower.Id = oldTower != null ? oldTower.Id : 0;
 
-            attackSystem.Unregister(oldTower);
-            attackSystem.Register(newTower);
-
-            // مهم: registry رو با view جدید آپدیت کن قبل از Destroy کردن view قدیمی.
+            // Re-register so the registry's view→placed dictionary picks up the new View.
+            // TowerAttackSystem iterates registry.All each frame, so no extra hand-off needed.
             registry.Unregister(placed);
             placed.Tower = newTower;
             placed.View = newView;

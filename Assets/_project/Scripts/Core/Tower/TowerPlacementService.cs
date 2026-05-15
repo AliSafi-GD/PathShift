@@ -40,7 +40,6 @@ namespace _project.Scripts.Core.Tower
         private readonly IPathService pathService;
         private readonly TowerFactory towerFactory;
         private readonly GridData gridData;
-        private readonly TowerAttackSystem attackSystem;
         private readonly IWallet wallet;
         private readonly IPlacedTowerRegistry placedRegistry;
 
@@ -51,7 +50,6 @@ namespace _project.Scripts.Core.Tower
             IPathService pathService,
             TowerFactory towerFactory,
             GridData gridData,
-            TowerAttackSystem attackSystem,
             IWallet wallet,
             IPlacedTowerRegistry placedRegistry)
         {
@@ -59,7 +57,6 @@ namespace _project.Scripts.Core.Tower
             this.pathService = pathService;
             this.towerFactory = towerFactory;
             this.gridData = gridData;
-            this.attackSystem = attackSystem;
             this.wallet = wallet;
             this.placedRegistry = placedRegistry;
         }
@@ -133,7 +130,6 @@ namespace _project.Scripts.Core.Tower
 
             var (tower, view) = towerFactory.Create(cell.WorldPosition, card.TowerConfig);
             tower.Id = ++nextId;
-            attackSystem.Register(tower);
 
             placedRegistry?.Register(new PlacedTower
             {
