@@ -58,7 +58,7 @@ namespace _project.Scripts.UI.Tower
             }
         }
 
-        // از GameBootstrapper وقتی کارت انتخاب نشده صدا زده میشه.
+        // Called by MouseInputRouter when no card is selected.
         public void HandleWorldClick()
         {
             if (cardSelection != null && cardSelection.Current != null) return;

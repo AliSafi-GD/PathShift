@@ -9,6 +9,7 @@ using _project.Scripts.Presentation.View;
 using _project.Scripts.UI.Cards;
 using _project.Scripts.UI.Tower;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VContainer;
 using VContainer.Unity;
 
@@ -43,7 +44,8 @@ namespace _project.Scripts.Core.Bootstrap
         [SerializeField] private TowerActionsController towerActionsController;
 
         [Header("Game")]
-        [SerializeField] private GameBootstrapper gameBootstrapper;
+        [FormerlySerializedAs("gameBootstrapper")]
+        [SerializeField] private MouseInputRouter mouseInputRouter;
         [SerializeField] private GameOverController gameOverController;
 
         protected override void Configure(IContainerBuilder builder)
@@ -54,7 +56,7 @@ namespace _project.Scripts.Core.Bootstrap
             EconomyModule.Install(builder, walletConfig);
             CardsModule.Install(builder, deckConfig, towerCardBarView);
             UIModule.Install(builder, towerActionsController);
-            GameModule.Install(builder, gameBootstrapper, gameOverController);
+            GameModule.Install(builder, mouseInputRouter, gameOverController);
         }
     }
 }
