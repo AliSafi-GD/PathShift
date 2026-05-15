@@ -2,6 +2,8 @@
 
 A Unity tower‑defense game. This file is the entry point for any developer (human or AI) joining the project.
 
+> **New here?** Read [ONBOARDING.md](ONBOARDING.md) first — it walks through three end‑to‑end flows and shows how to add a tower or enemy without writing code. This file is the deeper reference for conventions and the refactor roadmap.
+
 ## Stack
 
 - **Unity** (current LTS) — runtime
@@ -93,7 +95,9 @@ Status of the cleanup the team agreed on:
   - `Domain/Combat/Health.cs` introduced as the pure C# health model (implements `IHealth`). `UnityHealth` is now a thin scene adapter that holds the `[SerializeField] maxHealth` and forwards every call to an inner `Health`.
   - **Diverged from the original plan:** did not extract logic from `UnityMovement` (DOTween is bound to `transform`; the seam would be artificial) or `UnityMeleeAttacker` (tiny). Did not introduce `IAnimatorController` — animator scripts are already thin tween wrappers and an interface would be ceremony with no second consumer.
   - **Rule of thumb:** extract only when the pure logic earns its own unit test or shields the rest of the codebase from a heavy dependency. `Health` cleared that bar; the others didn't.
-- [ ] **Phase 5 — Docs & contributing guide**
+- [x] **Phase 5 — Docs & contributing guide** *(done)*
+  - [ONBOARDING.md](ONBOARDING.md) at the project root: how to run the project, an in‑60‑seconds architecture summary, three end‑to‑end flows with file links (placement / wave / attack), and step‑by‑step recipes for adding a tower or an enemy.
+  - This file (CLAUDE.md) now points to ONBOARDING.md from the top and stays as the conventions + roadmap reference.
 
 ## Design patterns used / planned
 
