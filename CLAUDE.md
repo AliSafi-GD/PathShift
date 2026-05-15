@@ -89,9 +89,10 @@ Status of the cleanup the team agreed on:
   - Factory interfaces introduced: `ITowerFactory`, `IEnemyFactory`, `IMortarProjectileFactory` (`IProjectileFactory` already existed). Concrete `MonoBehaviour` factories now register `.As<IFoo>()` and consumers depend on the interface.
   - **Diverged from the original plan:** rejected a full Command pattern (no Undo/queueing need today). Instead introduced `PlacementResult` and `TowerActionResult` value types to replace the `bool + out cell + out failure` triplet. Same readability win without ceremony.
   - Removed dead `EnemyFactory.Setup(Transform)` method.
-- [ ] **Phase 4 — Presentation/View split**
-  - Extract pure logic from `UnityHealth`, `UnityMovement`, etc.
-  - Animators behind `IAnimatorController`.
+- [x] **Phase 4 — Presentation/View split** *(minimal pass)*
+  - `Domain/Combat/Health.cs` introduced as the pure C# health model (implements `IHealth`). `UnityHealth` is now a thin scene adapter that holds the `[SerializeField] maxHealth` and forwards every call to an inner `Health`.
+  - **Diverged from the original plan:** did not extract logic from `UnityMovement` (DOTween is bound to `transform`; the seam would be artificial) or `UnityMeleeAttacker` (tiny). Did not introduce `IAnimatorController` — animator scripts are already thin tween wrappers and an interface would be ceremony with no second consumer.
+  - **Rule of thumb:** extract only when the pure logic earns its own unit test or shields the rest of the codebase from a heavy dependency. `Health` cleared that bar; the others didn't.
 - [ ] **Phase 5 — Docs & contributing guide**
 
 ## Design patterns used / planned

@@ -1,65 +1,42 @@
-﻿using System;
+using System;
+using _project.Scripts.Domain.Combat;
 using _project.Scripts.Domain.Interfaces;
 using UnityEngine;
 
 namespace _project.Scripts.Presentation.View
 {
+    // Scene-side adapter: exposes a serialized MaxHealth slot and forwards every
+    // call to a plain-C# Health instance. The real model lives in Domain/Combat.
     public class UnityHealth : MonoBehaviour, IHealth
     {
         [SerializeField] private float maxHealth = 100f;
 
-        private float currentHealth;
-        private bool died;
+        private Health health;
+        private Health Inner => health ??= new Health(maxHealth);
 
-        public bool IsAlive => CurrentHealth > 0f;
-        public float MaxHealth => maxHealth;
+        public bool IsAlive => Inner.IsAlive;
+        public float MaxHealth => Inner.MaxHealth;
+        public float CurrentHealth => Inner.CurrentHealth;
 
-        public float CurrentHealth
+        public event Action OnDied
         {
-            get => currentHealth;
-            set
-            {
-                var clamped = Mathf.Clamp(value, 0f, maxHealth);
-                if (Mathf.Approximately(clamped, currentHealth)) return;
-                currentHealth = clamped;
-                OnHealthChanged?.Invoke(currentHealth, maxHealth);
-                if (!died && currentHealth <= 0f)
-                {
-                    died = true;
-                    OnDied?.Invoke();
-                }
-            }
+            add => Inner.OnDied += value;
+            remove => Inner.OnDied -= value;
         }
 
-        public event Action OnDied;
-        public event Action<float, float> OnHealthChanged;
-
-        private void Awake()
+        public event Action<float, float> OnHealthChanged
         {
-            currentHealth = maxHealth;
+            add => Inner.OnHealthChanged += value;
+            remove => Inner.OnHealthChanged -= value;
         }
 
-        // ست کردن قبل از Awake: مقدار اولیه health هم باهاش پر میشه.
-        // ست کردن بعد از Awake: فقط سقف عوض میشه (currentHealth دست‌نخورده).
+        public void TakeDamage(float amount) => Inner.TakeDamage(amount);
+        public void Heal(float amount) => Inner.Heal(amount);
+
         public void SetMaxHealth(float value, bool resetCurrent = true)
         {
             maxHealth = Mathf.Max(1f, value);
-            if (resetCurrent) currentHealth = maxHealth;
-            else currentHealth = Mathf.Min(currentHealth, maxHealth);
-            died = false;
-        }
-
-        public void TakeDamage(float amount)
-        {
-            if (amount <= 0f) return;
-            CurrentHealth -= amount;
-        }
-
-        public void Heal(float amount)
-        {
-            if (amount <= 0f) return;
-            if (!IsAlive) return; // can't heal a corpse
-            CurrentHealth += amount;
+            Inner.SetMax(maxHealth, resetCurrent);
         }
     }
 }
