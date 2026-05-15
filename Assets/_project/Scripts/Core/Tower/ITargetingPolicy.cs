@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using _project.Scripts.Core.Enemy;
-using _project.Scripts.Domain.Entitties;
+using _project.Scripts.Domain.Entities;
 using _project.Scripts.Domain.Interfaces;
 using UnityEngine;
 
@@ -8,17 +8,17 @@ namespace _project.Scripts.Core.Tower
 {
     public interface IProjectileFactory
     {
-        void Create(Vector3 origin, Domain.Entitties.Enemy target, float damage);
+        void Create(Vector3 origin, Domain.Entities.Enemy target, float damage);
     }
 
     public interface IWeapon
     {
-        void Fire(Vector3 origin, Domain.Entitties.Enemy target);
+        void Fire(Vector3 origin, Domain.Entities.Enemy target);
     }
 
     public interface ITargetingPolicy
     {
-        Domain.Entitties.Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Domain.Entitties.Enemy> enemies);
+        Domain.Entities.Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Domain.Entities.Enemy> enemies);
     }
 
     public class CannonWeapon : IWeapon
@@ -32,7 +32,7 @@ namespace _project.Scripts.Core.Tower
             this.damage = damage;
         }
 
-        public void Fire(Vector3 origin, Domain.Entitties.Enemy target)
+        public void Fire(Vector3 origin, Domain.Entities.Enemy target)
         {
             projectileFactory.Create(origin, target, damage);
         }
@@ -57,7 +57,7 @@ namespace _project.Scripts.Core.Tower
             this.travelTime = travelTime;
         }
 
-        public void Fire(Vector3 origin, Domain.Entitties.Enemy target)
+        public void Fire(Vector3 origin, Domain.Entities.Enemy target)
         {
             if (factory == null) return;
             if (!(target.GetEnemyView() is EnemyView view) || view == null) return;
@@ -67,9 +67,9 @@ namespace _project.Scripts.Core.Tower
 
     public class ClosestTargetPolicy : ITargetingPolicy
     {
-        public Domain.Entitties.Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Domain.Entitties.Enemy> enemies)
+        public Domain.Entities.Enemy SelectTarget(Vector3 towerPosition, float range, IReadOnlyList<Domain.Entities.Enemy> enemies)
         {
-            Domain.Entitties.Enemy best = null;
+            Domain.Entities.Enemy best = null;
             float minSqr = range * range;
 
             foreach (var enemy in enemies)

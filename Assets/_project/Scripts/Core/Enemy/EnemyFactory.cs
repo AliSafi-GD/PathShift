@@ -15,7 +15,7 @@ namespace _project.Scripts.Core.Enemy
             this.startSpawnTransform = startSpawnTransform;
         }
 
-        public Domain.Entitties.Enemy CreateEnemy(Vector3 spawnPosition, EnemyConfig config)
+        public Domain.Entities.Enemy CreateEnemy(Vector3 spawnPosition, EnemyConfig config)
         {
             var prefab = (config != null && config.Prefab != null) ? config.Prefab : fallbackPrefab;
             EnemyView instance = Instantiate(prefab, spawnPosition, Quaternion.identity);
@@ -40,7 +40,7 @@ namespace _project.Scripts.Core.Enemy
                 unityAttacker.SetStats(config.Damage, config.AttackInterval);
             }
 
-            return new Domain.Entitties.Enemy(unityMovement, unityHealth, unityAttackable, unityAttacker, instance);
+            return new Domain.Entities.Enemy(unityMovement, unityHealth, unityAttackable, unityAttacker, instance);
         }
     }
 }

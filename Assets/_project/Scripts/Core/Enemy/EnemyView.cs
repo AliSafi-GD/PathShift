@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using _project.Scripts.Domain.Entitties;
+using _project.Scripts.Domain.Entities;
 using _project.Scripts.Domain.Grid;
 using _project.Scripts.Domain.Interfaces;
 using DG.Tweening;

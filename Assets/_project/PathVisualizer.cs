@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using _project.Scripts.Core.Context;
 using _project.Scripts.Core.Events.Base;
 using _project.Scripts.Core.Events.GameEventsModel;
 using _project.Scripts.Domain.Grid;

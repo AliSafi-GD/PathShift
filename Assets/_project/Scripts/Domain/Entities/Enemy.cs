@@ -3,7 +3,7 @@ using _project.Scripts.Core.Enemy;
 using _project.Scripts.Domain.Interfaces;
 using UnityEngine;
 
-namespace _project.Scripts.Domain.Entitties
+namespace _project.Scripts.Domain.Entities
 {
     public interface IEnemyView { }
     public class Enemy

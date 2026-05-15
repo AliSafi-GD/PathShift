@@ -6,9 +6,9 @@ namespace _project.Scripts.Core.Enemy
 {
     public class EnemyContainer
     {
-        private readonly List<Domain.Entitties.Enemy> enemies = new List<Domain.Entitties.Enemy>();
+        private readonly List<Domain.Entities.Enemy> enemies = new List<Domain.Entities.Enemy>();
 
-        public void AddEnemy(Domain.Entitties.Enemy enemy)
+        public void AddEnemy(Domain.Entities.Enemy enemy)
         {
             enemies.Add(enemy);
         }
@@ -17,12 +17,12 @@ namespace _project.Scripts.Core.Enemy
             enemies.RemoveAll(e => !e.GetBehavior<IHealth>().IsAlive);
         }
 
-        public void RemoveItem(Domain.Entitties.Enemy enemyView)
+        public void RemoveItem(Domain.Entities.Enemy enemyView)
         {
             enemies.Remove(enemyView);
         }
 
-        public List<Domain.Entitties.Enemy> GetAliveEnemies()
+        public List<Domain.Entities.Enemy> GetAliveEnemies()
         {
             return enemies.Where(e => e.GetBehavior<IHealth>().IsAlive).ToList();
         }

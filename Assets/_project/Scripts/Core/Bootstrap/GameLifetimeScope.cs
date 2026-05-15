@@ -165,13 +165,6 @@ namespace _project.Scripts.Core.Bootstrap
             foreach (var hud in FindObjectsByType<_project.Scripts.UI.Stats.GameStateHudView>(
                          FindObjectsInactive.Include, FindObjectsSortMode.None))
                 builder.RegisterComponent(hud);
-            builder.RegisterBuildCallback(container =>
-            {
-                // Inject روی همه‌ی MonoBehaviour های صحنه که [Inject] دارن
-                // (TowerCardBarView و CurrencyHudView های صحنه).
-                // VContainer به صورت پیش‌فرض همینکار رو با AutoInjectGameObjects انجام میده،
-                // ولی اگه نمی‌خوای روش حساب کنی، تو Awake خودشون هم می‌تونی resolve کنی.
-            });
 
             // Game over UI
             builder.RegisterComponent(gameOverController);
