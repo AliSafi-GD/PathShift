@@ -77,10 +77,13 @@ Status of the cleanup the team agreed on:
   - Cleaned unused usings in touched files.
   - **Open question / known debt:** `IAttackable.ReceiveDamage` is currently a pass‑through to `IHealth.TakeDamage` (see `UnityAttackable`). Keeping the abstraction in case future shields/armor want to intercept damage before health. Revisit if no second consumer appears.
   - **Not done this phase:** Unit‑test project for Domain.
-- [ ] **Phase 2 — Bootstrap split**
-  - Break `GameLifetimeScope` into per‑module `Installer`s.
-  - Split `GameBootstrapper` into `MouseInputRouter` + `GameLoopStarter`.
-  - Introduce `IGameStateMachine` (Playing/Paused/Won/Lost), `ISceneLoader`, `IInputService`.
+- [x] **Phase 2 — Bootstrap split** *(done)*
+  - `GameLifetimeScope.Configure()` reduced from ~120 lines to 7 calls. Each concern lives in its own static class under `Core/Bootstrap/Modules/` (`MapModule`, `EnemyModule`, `TowerModule`, `EconomyModule`, `CardsModule`, `UIModule`, `GameModule`).
+  - `GameBootstrapper` split into `MouseInputRouter` (MonoBehaviour, click routing) and `GameLoopStarter` (plain C# `IStartable + IDisposable`, starts/stops the wave loop and shows the initial path).
+  - `IGameStateMachine` + `GameStateMachine` (Playing/Paused/Won/Lost) owns `Time.timeScale` transitions; `GameOverController` is now a thin listener.
+  - `ISceneLoader` + `SceneLoader` wraps `SceneManager.LoadScene` for testability.
+  - **Open question / known debt:** `IInputService` not introduced — `MouseInputRouter` still `new`s `TestInput` directly. Revisit when a second input source appears.
+  - **Folder/namespace mismatch:** `Core/Map/MapInstaller.cs` lives in `Domain/Map/` folder. Pre-existing inconsistency, left alone to keep blast radius small.
 - [ ] **Phase 3 — Tower & Placement**
   - Split `TowerAttackSystem` (registry vs. tick loop).
   - Unify placement under a Command pattern.
