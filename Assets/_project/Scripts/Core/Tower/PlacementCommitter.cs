@@ -47,10 +47,10 @@ namespace _project.Scripts.Core.Tower
                 return PlacementResult.Fail(PlacementFailure.InvalidCell);
 
             var cam = Camera.main;
-            if (cam == null || Mouse.current == null)
+            if (cam == null || Pointer.current == null)
                 return PlacementResult.Fail(PlacementFailure.InvalidCell);
 
-            var screenPos = Mouse.current.position.ReadValue();
+            var screenPos = Pointer.current.position.ReadValue();
             var ray = cam.ScreenPointToRay(screenPos);
             if (!Physics.Raycast(ray, out var hit, 1000f))
                 return PlacementResult.Fail(PlacementFailure.InvalidCell);

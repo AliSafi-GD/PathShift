@@ -66,9 +66,9 @@ namespace _project.Scripts.UI.Tower
                 return;
 
             if (mainCamera == null) mainCamera = Camera.main;
-            if (mainCamera == null || Mouse.current == null) return;
+            if (mainCamera == null || Pointer.current == null) return;
 
-            var screenPos = Mouse.current.position.ReadValue();
+            var screenPos = Pointer.current.position.ReadValue();
             var ray = mainCamera.ScreenPointToRay(screenPos);
             if (!Physics.Raycast(ray, out var hit, rayLength, raycastMask))
             {
